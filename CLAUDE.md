@@ -47,43 +47,94 @@ Input → Engine(pure/deterministic) → Snapshot(immutable) → Report → UI
   setLastReport()/getLastReport() 패턴(Engine 재실행 없이 화면에 표시된
   값만 재사용)을 그대로 가져온다.
 
-## 지금 상태 (마지막 업데이트: 세션 1, 2026-09-22)
+## 작업 절차 (STEP 게이트 — 반드시 순서대로, 건너뛰지 않는다)
+
+```
+STEP 0  Git 상태 확인 (git status, HEAD, origin과의 diff)
+        ↓
+STEP 1  법령 원문 조사 (law.go.kr, moel.go.kr 공식 FAQ 등 1차자료 우선)
+        ↓
+STEP 2  판정 항목 추출 (REGULATION-NOTES.md에 신뢰도 표시와 함께 기록)
+        ↓
+STEP 3  Rule Contract 작성 (RULE-CONTRACT.md — 판정 모듈·조건·근거·
+        입력모델을 코드화 직전 형태로 정리)
+        ↓
+STEP 4  검토자가 읽을 조사보고 (채팅으로 요약 보고, 코드 없음)
+        ↓
+       [사용자 승인 — RULE-CONTRACT.md 상단에 "승인됨: <날짜>" 기록]
+        ↓
+STEP 5  Engine 설계 (승인된 RULE-CONTRACT.md만 근거로 함)
+        ↓
+STEP 6  구현 (law-basis.js → engine.js → ... )
+```
+
+**RULE-CONTRACT.md가 승인되기 전까지 STEP 5·6(Engine 설계/구현, 즉 어떤
+코드 작성도)로 넘어가지 않는다.** 조사 중에 스스로 판단해서 코드부터
+쓰고 나중에 문서를 맞추는 순서는 금지 — 이 프로젝트 세션 1에서 실제로
+그 실패가 지적되어 프로세스를 다시 잡은 것이다 (DECISIONS.md 참고).
+
+## 세션 인수인계 5개 문서
+
+이 다섯 개만 있으면 세션이 끊겨도 이어받을 수 있어야 한다:
+
+- `CLAUDE.md` — 이 파일. 절차·현재 상태·다음 할 일
+- `REGULATION-NOTES.md` — 법령 리서치, 출처별 신뢰도(🟢🟡🔴)
+- `RULE-CONTRACT.md` — 판정 로직의 코드화 직전 명세, 승인 게이트
+- `DECISIONS.md` — 왜 이렇게 결정했는지 로그 (같은 논쟁 반복 방지)
+- `ROADMAP.md` — Phase 구성, 후속 프로젝트 후보
+
+
+
+## 지금 상태 (마지막 업데이트: 세션 1, 2026-09-22 — STEP 4 완료, 승인 대기)
 
 - [x] 저장소 생성 완료 (wn0814jo-afk/arcsafe-hazard-prevention-plan, public)
-- [x] 규정 리서치 1차 완료 — REGULATION-NOTES.md 참조. 5개 이상의 독립
-      출처(safetyplus.co.kr, kosri9142.com, 한국위험관리센터, kosi.ne.kr,
-      hseworld.co.kr)를 교차 확인했으나, **전부 실무 대행사/컨설팅사 자료이며
-      법령/고시 원문(law.go.kr)으로 최종 대조한 조문은 아직 하나도 없다** —
-      전부 "2차 자료"로 표시했다. 다음 세션에서 반드시 law.go.kr에서
-      「산업안전보건법 시행령」제42조 및 「제조업 등 유해위험방지계획서
-      제출·심사·확인에 관한 고시」원문을 직접 열어 조문 번호까지 대조할 것.
-- [x] 개념도(CONCEPT.md, 판정 흐름 Mermaid 다이어그램) 초안 작성
+- [x] STEP 1(법령 원문 조사) 완료 — law.go.kr에서 시행령 제42조①②
+      원문 직접 대조(🟢), moel.go.kr 공식 FAQ 2건으로 고시 제3조(5종
+      설비, 🟢)와 PSM 고시 제2조제1항제1호(300kW, 이 저장소와 무관함을
+      확정, 🟢) 대조 완료. 증설/이설의 100kW 자체는 4개 이상 2차자료
+      일치이나 정확한 고시 조번호는 미확정(🟡).
+- [x] STEP 2(판정 항목 추출) 완료 — REGULATION-NOTES.md
+- [x] STEP 3(Rule Contract 작성) 완료 — RULE-CONTRACT.md, **아직 승인
+      안 됨**
+- [x] 개념도(CONCEPT.md) — "300kW 계산기" 프레이밍을 버리고 6항목 입력
+      모델 + 4개 독립 판정 모듈 + 장기 "산업안전 대상판별기" 구조로 재작성
+- [x] 의사결정 로그(DECISIONS.md) 작성 — 제품 구조, 이름/프레이밍,
+      승인 게이트, 100kW/300kW 근본원인, 건설공사 규모기준 발견 5건 기록
 - [x] 로드맵(ROADMAP.md) 작성
-- [ ] law-basis.js(SSOT) 아직 작성 안 함 — 원문 대조 전이라 시작 안 했음
-- [ ] engine.js/data.js/state.js/report.js/ui.js 아직 없음
-- [ ] 테스트 하나도 없음
-- [ ] 배포 설정(wrangler 등) 아직 없음
+- [ ] **STEP 4 조사보고를 채팅으로 사용자에게 전달, RULE-CONTRACT.md
+      승인 대기 중** — 이게 다음 세션 시작 시 가장 먼저 확인할 것
+- [ ] law-basis.js/engine.js/data.js/state.js/report.js/ui.js — 전부
+      아직 없음. **RULE-CONTRACT.md 승인 전까지 작성 금지**
+- [ ] 테스트 없음, 배포 설정 없음
 
 ## 다음 세션에서 할 일 (우선순위 순)
 
-1. law.go.kr에서 시행령 제42조·관련 고시 원문 직접 열람 → REGULATION-NOTES.md의
-   "미확인" 항목들을 "1차 확인"으로 승격하거나, 틀린 부분을 수정
-   (특히 그린휘슬 자료 하나만 "300kW 증가"라고 다르게 말한 부분 — 나머지
-   4개 출처는 "100kW"라고 일치했음. 원문 대조로 확정 필요)
-2. 5종 설비별 세부 기준(용해로 3톤, 화학설비 별표9 기준량, 건조설비 정격
-   50kW/연료 50kg·h, 가스집합용접장치, 유해물질 밀폐환기배기설비)도
-   고시 제3조 원문으로 확인
-3. law-basis.js 작성 (원문 대조 끝난 조문만 등록)
-4. engine.js 설계 — 입력 분기가 이미 상당히 복잡함(신설/이전/이설/증설/
-   교체/개조 × 업종여부 × 5종설비여부 × 전기계약/정격용량). CONCEPT.md의
-   판정 트리를 기준으로 pure function 설계
+1. 이 대화(또는 사용자 메시지)에서 RULE-CONTRACT.md 승인 여부/수정
+   요청이 있었는지 먼저 확인. 승인됐으면 RULE-CONTRACT.md 상단에
+   "승인됨: <날짜>" 기록부터 하고 STEP 5로 진행. 아직이면 STEP 4에
+   머물러 있어야 한다 — 코드 작성 시작하지 말 것.
+2. (미승인 상태라면) RULE-CONTRACT.md 승인 체크리스트의 미결 항목부터
+   해소: 건설공사 규모기준 포함 여부, 100kW의 정확한 고시 조번호
+   (admRulInfoP.do가 JS 렌더링이라 실패했음 — 국가법령정보센터 Open API
+   나 다른 경로 시도)
+3. 승인 후: law-basis.js 작성 (RULE-CONTRACT.md의 판정 모듈 1~4를
+   조문 원문 그대로 옮김, 요약·재구성 금지)
+4. engine.js 설계 — CONCEPT.md의 4개 독립 판정 모듈을 각각 pure
+   function으로, self-test 포함
 5. 그 다음부터는 safety-cert-checker 순서(Engine self-test → Snapshot →
    Report → UI → QA)를 그대로 따라간다
 
 ## 절대 하지 말 것
 
+- **RULE-CONTRACT.md 승인 없이 law-basis.js/engine.js 등 어떤 코드도
+  작성하지 말 것** (위 STEP 게이트 참조 — 세션 1에서 이 규칙이 없어서
+  사용자가 직접 프로세스를 다시 잡았다)
 - 원문 대조 전 규정을 law-basis.js에 SSOT로 확정 등록하지 말 것 (2차 자료
   단계에서는 REGULATION-NOTES.md에만 적어둔다)
 - PSM(공정안전보고서) 중대변경 판정을 이 저장소에 섞지 말 것 — 완전히 다른
-  법조문·고시이며, 섞으면 SSOT가 오염된다
+  법조문·고시이며, 섞으면 SSOT가 오염된다. (실제로 100kW/300kW를 섞은
+  실무자료가 존재함을 확인함 — DECISIONS.md 참고. 이 프로젝트가 바로 그
+  실수를 하지 않도록 하는 게 존재 이유 중 하나다)
+- 제품 이름/UI 문구에 "300kW 계산기"처럼 특정 숫자를 못박지 말 것 —
+  계약용량/정격용량을 혼동하게 만든다 (DECISIONS.md 참고)
 - 세션을 마치기 전에 이 파일의 "지금 상태" 갱신 없이 끝내지 말 것
