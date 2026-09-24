@@ -63,13 +63,63 @@ Final의 Reasons에는 TARGET인 모듈 전부(여기서는 1과 4)가 나열된
 - **UNKNOWN**: 판단에 필요한 필수 정보가 없거나 아직 입력되지 않아
   판단할 수 없는 상태
 
-**최종 판정(4개 모듈 종합)**:
+**최종 판정(4개 모듈 종합)** — `finalStatus` + `determinationCompleteness`
+두 값으로 구성한다(세션4 보정, 검토자 지적 반영). 하나의 상태값만으로는
+"TARGET이지만 다른 모듈은 아직 미확정"인 경우를 표현할 수 없기 때문이다:
+
 ```
-final =
-  대상(TARGET) 모듈이 하나라도 있으면        → TARGET
-  전부 NOT_TARGET이면                        → NOT_TARGET (현재 입력 범위 한정)
-  TARGET은 없고 UNKNOWN이 하나라도 있으면     → UNKNOWN
+finalStatus =
+  TARGET인 모듈이 하나라도 있으면       → TARGET
+  TARGET은 없고 UNKNOWN이 있으면        → UNKNOWN
+  전부 NOT_TARGET이면                   → NOT_TARGET
+
+determinationCompleteness =
+  UNKNOWN인 모듈이 하나라도 있으면      → INCOMPLETE
+  UNKNOWN인 모듈이 하나도 없으면        → COMPLETE
 ```
+
+**두 값은 독립적으로 계산하고 항상 함께 표시한다.** 예:
+
+```
+Module 1 = TARGET
+Module 2 = UNKNOWN
+Module 3 = NOT_TARGET
+Module 4 = NOT_TARGET
+
+finalStatus = TARGET
+determinationCompleteness = INCOMPLETE
+
+→ 화면 표시: "대상 — 단, 일부 판정 항목은 확인되지 않았습니다."
+```
+
+```
+Module 1 = NOT_TARGET
+Module 2 = UNKNOWN
+Module 3 = NOT_TARGET
+Module 4 = NOT_TARGET
+
+finalStatus = UNKNOWN
+determinationCompleteness = INCOMPLETE
+
+→ 화면 표시: "현재 입력만으로는 대상 여부를 판단할 수 없습니다."
+```
+
+```
+Module 1 = TARGET
+Module 2 = NOT_TARGET
+Module 3 = NOT_TARGET
+Module 4 = NOT_TARGET
+
+finalStatus = TARGET
+determinationCompleteness = COMPLETE
+
+→ 화면 표시: "대상입니다." (추가 확인 문구 불필요 — 4개 모듈 전부 확정됨)
+```
+
+finalStatus만 TARGET이라고 해서 determinationCompleteness를 생략하면
+안 된다 — TARGET이면서 INCOMPLETE인 경우, 사용자는 "지금 확인된 사유로
+이미 대상"이라는 사실과 "다른 판정 경로에 아직 미확정 항목이 있다"는
+사실을 **둘 다** 알아야 한다. Snapshot에는 이 두 값을 모두 기록한다.
 
 **절대 규칙(fail-closed)**: **UNKNOWN을 NOT_TARGET으로 자동 변환하지
 않는다.** 예를 들어 업종이 13개 목록에 없어도 모듈 4(대상설비 5종)를
@@ -78,13 +128,16 @@ final =
 실패 모드다. 이 규칙은 후속 engine.js의 fail-fast/fail-closed 설계와
 직접 연결된다(STEP 5에서 구현 시 반드시 준수).
 
-**UNKNOWN의 표시 강도**: 4개 모듈 중 TARGET이 하나도 없는 상태에서
-UNKNOWN이 하나라도 있으면, 결과 화면은 절대 "비대상"으로 읽히면 안 된다.
-반드시 **"현재 정보만으로는 비대상이라고 확정할 수 없음"**을 명시적으로
-보여준다 — NOT_TARGET 모듈이 3개, UNKNOWN 모듈이 1개인 경우에도 최종
-문구는 "대상 아님"이 아니라 "판단 보류, 추가 확인 필요"여야 한다.
-사용자가 결과 화면만 보고 "아, 대상 아니구나"라고 오해하게 만드는 문구
-(예: 옅은 회색 안내문 하나로만 처리)는 이 문서 위반이다.
+**UNKNOWN의 표시 강도**: `determinationCompleteness`가 INCOMPLETE인
+경우(즉 UNKNOWN 모듈이 하나라도 있는 경우), 결과 화면은 절대 "비대상"
+으로만 읽히면 안 된다. `finalStatus`가 NOT_TARGET이 아닌 이상 —
+정확히는 finalStatus가 UNKNOWN이거나, TARGET이면서도 INCOMPLETE인
+경우 모두 — 반드시 **"현재 입력만으로는 비대상이라고 확정할 수
+없음"** 계열의 문구를 명시적으로 보여준다. NOT_TARGET 모듈이 3개,
+UNKNOWN 모듈이 1개인 경우(finalStatus=UNKNOWN) 최종 문구는 "대상
+아님"이 아니라 "판단 보류, 추가 확인 필요"여야 한다. 사용자가 결과
+화면만 보고 "아, 대상 아니구나"라고 오해하게 만드는 문구(예: 옅은
+회색 안내문 하나로만 처리)는 이 문서 위반이다.
 
 ## 판정 모듈 1 — 사업장 기준 (신설/전체 이전)
 
@@ -255,14 +308,19 @@ UNKNOWN과 근거를 Map은 그대로 읽어서 그리기만 한다. STEP 5(Engi
 ─────────────────────────────────────
 ```
 
-TARGET인 모듈이 하나도 없고 UNKNOWN인 모듈이 있으면, 결과 화면
-최상단에 "🟡 판단 보류 — 아래 항목을 추가로 확인해야 합니다"를
-NOT_TARGET보다 먼저, 더 눈에 띄게 표시한다(fail-closed 원칙을 UI에도
-반영).
+`finalStatus`가 UNKNOWN인 경우(TARGET 모듈 없이 UNKNOWN 모듈이 있는
+경우), 결과 화면 최상단에 "🟡 판단 보류 — 아래 항목을 추가로 확인해야
+합니다"를 표시한다. `finalStatus`가 TARGET이면서 `determinationCompleteness`
+가 INCOMPLETE인 경우("이미 대상 사유는 있지만 다른 판정 경로가 아직
+미확정")에도 "✅ 대상 — 단, 일부 항목은 확인되지 않았습니다"처럼 두 가지
+정보를 함께 보여준다. 두 경우 모두 NOT_TARGET처럼 보이는 표현보다
+먼저, 더 눈에 띄게 표시한다(fail-closed 원칙을 UI에도 반영).
 
 Snapshot에는 판정마다 `rule_id → input → 판단(TARGET/NOT_TARGET/
-UNKNOWN) → 법적 근거(조번호) → 적용 버전`을 남긴다 — Report는 이
-Snapshot에서만 파생된다는 기존 아키텍처 원칙과 그대로 합치.
+UNKNOWN) → 법적 근거(조번호) → 적용 버전`을 남기고, Snapshot 전체
+수준에서 `finalStatus`와 `determinationCompleteness`도 함께 기록한다
+— Report는 이 Snapshot에서만 파생된다는 기존 아키텍처 원칙과 그대로
+합치.
 
 Engine은 6개 입력을 받아 4개 판정 모듈을 **각각 독립적으로** 평가하고,
 해당하는 모든 모듈의 결과를 함께 보여준다 (safety-cert-checker가 3개
@@ -284,6 +342,9 @@ Engine은 6개 입력을 받아 4개 판정 모듈을 **각각 독립적으로**
 - [x] TARGET/NOT_TARGET/UNKNOWN 3상태, UNKNOWN→NOT_TARGET 자동전환
       금지, "현재 정보만으로 비대상 확정 불가" 표시 강도 — **명시
       완료**(세션4 보정, "결과 상태" 참고)
+- [x] **신규**: finalStatus + determinationCompleteness 이원 구조 —
+      "TARGET이지만 다른 모듈 미확정"과 "UNKNOWN 자체"를 구분 —
+      **명시 완료**(세션4 재보정, "결과 상태" 참고)
 - [x] STEP 4(대상설비)는 어떤 경우에도 생략하지 않음, 사업장 기준을
       설비 기준의 탈락조건으로 쓰지 않음 — **명시 완료**("입력 모델"
       참고)
