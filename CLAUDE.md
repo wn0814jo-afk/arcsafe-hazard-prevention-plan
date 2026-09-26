@@ -85,7 +85,7 @@ STEP 6  구현 (law-basis.js → engine.js → ... )
 
 
 
-## 지금 상태 (마지막 업데이트: 세션 1, 2026-09-22 — STEP 4 완료, 승인 대기)
+## 지금 상태 (마지막 업데이트: 세션4, 2026-09-25 — RULE-CONTRACT.md 승인됨, STEP 5 착수 가능)
 
 - [x] 저장소 생성 완료 (wn0814jo-afk/arcsafe-hazard-prevention-plan, public)
 - [x] STEP 1(법령 원문 조사) 완료 — law.go.kr에서 시행령 제42조①②
@@ -94,44 +94,60 @@ STEP 6  구현 (law-basis.js → engine.js → ... )
       확정, 🟢) 대조 완료.
 - [x] **Phase 0.5 원문 검증 완료(세션2·3)** — 100kW(고시 제2조제1항
       제5호 가/나목), 5종 설비 변경트리거(제2조제1항제6호 가~마목)
-      조번호 전부 확정. **세션3**에서 국가법령정보센터 신구조문대비표로
-      고시 제2023-50호(2023.10.6. 개정) 반영 완료 — 가목에 "단위공장 내
+      조번호 전부 확정. 국가법령정보센터 신구조문대비표로 고시
+      제2023-50호(2023.10.6. 개정) 반영 완료 — 가목에 "단위공장 내
       심사완료 동일 제조사·동일 모델 제외" 단서 신설, 나목·제6호는
       무변경. **미해소 법적 항목 0건.**
 - [x] STEP 2(판정 항목 추출) 완료 — REGULATION-NOTES.md
-- [x] STEP 3(Rule Contract 작성) 완료 — RULE-CONTRACT.md, 법적 SSOT
-      검증 전부 완료. **아직 승인 안 됨** (남은 체크리스트는 실무·UX
-      판단만: 모듈1~4 실무 감각, STEP1~6 위저드 분기 로직)
+- [x] STEP 3(Rule Contract 작성) 완료 — RULE-CONTRACT.md
+- [x] **STEP 4(검토자 재감사) 완료 — RULE-CONTRACT.md 승인됨:
+      2026-09-25**. 세션4에서 4차에 걸친 재감사를 거침:
+      1차(모듈독립성/3상태/조건부STEP/판정경로 UX 명시),
+      2차(TARGET+INCOMPLETE 표현을 위한 finalStatus+
+      determinationCompleteness 이원 구조 도입),
+      3차(모듈3(이설)에 누락됐던 "모듈1 조건 충족 사업장" 전제조건 발견·
+      수정 — 🔴급, 신구조문대비표 재정독으로 발견),
+      4차(STEP2·3 노출 근거를 "작업형태 무관 항상 노출"에서 "적용되는
+      모듈의 선행조건 확인 목적"으로 표현 정밀화). 4개 시나리오
+      데스크체크(신설+대상/증설+대상/이설+대상/업종미충족+설비대상)
+      전부 통과. 최종 🔴 0 / 🟡 0.
 - [x] 개념도(CONCEPT.md) — "300kW 계산기" 프레이밍을 버리고 6항목 입력
       모델 + 4개 독립 판정 모듈 + 장기 "산업안전 대상판별기" 구조로 재작성
 - [x] 의사결정 로그(DECISIONS.md) 작성 — 제품 구조, 이름/프레이밍,
       승인 게이트, 100kW/300kW 근본원인, 건설공사 규모기준 발견/제외
-      확정, 위저드 UX, Regulatory Map, 2023-50호 확정까지 전부 기록
+      확정, 위저드 UX, Regulatory Map, 2023-50호 확정, 모듈3 전제조건
+      발견까지 전부 기록
 - [x] 로드맵(ROADMAP.md) 작성 — Phase 5(건설공사 대상판별)로 분리
-- [ ] **STEP 4 조사보고 완료, RULE-CONTRACT.md 최종 검토·승인 대기 중**
-      — 이게 다음 세션 시작 시 가장 먼저 확인할 것 (법적 검증은 끝났고
-      실무 감각/UX 확인만 남음)
+- [ ] **다음이 바로 STEP 5(Engine 설계) 착수** — RULE-CONTRACT.md는
+      승인됐으므로 코드 작성 시작 가능. 다만 STEP 5 설계 시 RULE-
+      CONTRACT.md에 명시된 대로 `status`(TARGET/NOT_TARGET/UNKNOWN) +
+      `applicability`(APPLICABLE/NOT_APPLICABLE_TO_WORK_TYPE) 이원
+      필드를 Engine 데이터 모델에 반드시 반영할 것
 - [ ] law-basis.js/engine.js/data.js/state.js/report.js/ui.js — 전부
-      아직 없음. **RULE-CONTRACT.md 승인 전까지 작성 금지**
+      아직 없음. 이제는 작성 가능하나, **아직 작성 시작 안 함**
+      (검토자가 "코드 작성으로 넘어가라"고 명시적으로 지시하기 전까지는
+      계속 대기)
 - [ ] 테스트 없음, 배포 설정 없음
 
 ## 다음 세션에서 할 일 (우선순위 순)
 
-1. 이 대화(또는 사용자 메시지)에서 RULE-CONTRACT.md 승인 여부/수정
-   요청이 있었는지 먼저 확인. 승인됐으면 RULE-CONTRACT.md 상단에
-   "승인됨: <날짜>" 기록부터 하고 STEP 5로 진행. 아직이면 STEP 4에
-   머물러 있어야 한다 — 코드 작성 시작하지 말 것.
-2. (미승인 상태라면) RULE-CONTRACT.md 승인 체크리스트에서 남은 건
-   법적 검증이 아니라 **실무·UX 판단**뿐임: 판정 모듈 1~4 조건이 실무
-   감각과 맞는지, STEP 1~6 위저드 분기 로직이 실무 흐름과 맞는지. 법적
-   SSOT(100kW 조번호, 2023-50호 개정 반영)는 세션3에서 전부 확정됐으니
-   추가 원문 조사는 필요 없다.
-3. 승인 후: law-basis.js 작성 (RULE-CONTRACT.md의 판정 모듈 1~4를
-   조문 원문 그대로 옮김, 요약·재구성 금지 — 모듈2는 "동일 제조사·동일
-   모델 제외" 예외 로직 포함 필수)
-4. engine.js 설계 — CONCEPT.md의 4개 독립 판정 모듈을 각각 pure
-   function으로, self-test 포함
-5. 그 다음부터는 safety-cert-checker 순서(Engine self-test → Snapshot →
+1. RULE-CONTRACT.md는 **승인됨(2026-09-25)**. 이 대화(또는 사용자
+   메시지)에서 STEP 5(Engine 설계) 착수 지시가 있었는지 먼저 확인 —
+   명시적 지시 없이 스스로 판단해서 코드부터 쓰지 말 것(세션1의 실패를
+   반복하지 않는다).
+2. STEP 5 설계 시 필수 반영 사항 (RULE-CONTRACT.md 참고):
+   - law-basis.js: 모듈 1~4의 조문 원문을 그대로 옮김(요약·재구성 금지).
+     모듈2는 "동일 제조사·동일 모델 제외" 예외 로직 포함 필수. 모듈3에는
+     모듈1과 같은 업종+계약용량 전제조건이 있음(세션4 3차 재감사로
+     추가됨 — 놓치기 쉬우니 주의).
+   - engine.js: 4개 모듈을 각각 pure function으로, 항상 4개 다 평가
+     (short-circuit 금지). 각 모듈 결과는 `status`(TARGET/NOT_TARGET/
+     UNKNOWN) + `applicability`(APPLICABLE/NOT_APPLICABLE_TO_WORK_TYPE)
+     이원 필드. `finalStatus`/`determinationCompleteness` 집계 로직도
+     RULE-CONTRACT.md의 규칙 그대로. self-test 포함.
+   - UI/Regulatory Map: Snapshot을 그대로 시각화만 하고 자체 판정
+     로직을 갖지 않음(Input→Engine→Snapshot→Map→Report 순서 고정).
+3. 그 다음부터는 safety-cert-checker 순서(Engine self-test → Snapshot →
    Report → UI → QA)를 그대로 따라간다
 
 ## 절대 하지 말 것
