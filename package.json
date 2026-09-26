@@ -1,0 +1,11 @@
+{
+  "name": "arcsafe-hazard-prevention-plan",
+  "version": "0.1.0",
+  "private": true,
+  "description": "유해위험방지계획서 제출대상 판별 Engine (STEP 5 — Engine 설계/구현)",
+  "main": "engine.js",
+  "scripts": {
+    "test": "node tests.js"
+  },
+  "license": "UNLICENSED"
+}

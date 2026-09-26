@@ -85,70 +85,68 @@ STEP 6  구현 (law-basis.js → engine.js → ... )
 
 
 
-## 지금 상태 (마지막 업데이트: 세션4, 2026-09-25 — RULE-CONTRACT.md 승인됨, STEP 5 착수 가능)
+## 지금 상태 (마지막 업데이트: 세션5, 2026-09-26 — STEP 5 Engine 설계·구현 완료)
 
 - [x] 저장소 생성 완료 (wn0814jo-afk/arcsafe-hazard-prevention-plan, public)
-- [x] STEP 1(법령 원문 조사) 완료 — law.go.kr에서 시행령 제42조①②
-      원문 직접 대조(🟢), moel.go.kr 공식 FAQ 2건으로 고시 제3조(5종
-      설비, 🟢)와 PSM 고시 제2조제1항제1호(300kW, 이 저장소와 무관함을
-      확정, 🟢) 대조 완료.
-- [x] **Phase 0.5 원문 검증 완료(세션2·3)** — 100kW(고시 제2조제1항
-      제5호 가/나목), 5종 설비 변경트리거(제2조제1항제6호 가~마목)
-      조번호 전부 확정. 국가법령정보센터 신구조문대비표로 고시
-      제2023-50호(2023.10.6. 개정) 반영 완료 — 가목에 "단위공장 내
-      심사완료 동일 제조사·동일 모델 제외" 단서 신설, 나목·제6호는
-      무변경. **미해소 법적 항목 0건.**
-- [x] STEP 2(판정 항목 추출) 완료 — REGULATION-NOTES.md
-- [x] STEP 3(Rule Contract 작성) 완료 — RULE-CONTRACT.md
-- [x] **STEP 4(검토자 재감사) 완료 — RULE-CONTRACT.md 승인됨:
-      2026-09-25**. 세션4에서 4차에 걸친 재감사를 거침:
-      1차(모듈독립성/3상태/조건부STEP/판정경로 UX 명시),
-      2차(TARGET+INCOMPLETE 표현을 위한 finalStatus+
-      determinationCompleteness 이원 구조 도입),
-      3차(모듈3(이설)에 누락됐던 "모듈1 조건 충족 사업장" 전제조건 발견·
-      수정 — 🔴급, 신구조문대비표 재정독으로 발견),
-      4차(STEP2·3 노출 근거를 "작업형태 무관 항상 노출"에서 "적용되는
-      모듈의 선행조건 확인 목적"으로 표현 정밀화). 4개 시나리오
-      데스크체크(신설+대상/증설+대상/이설+대상/업종미충족+설비대상)
-      전부 통과. 최종 🔴 0 / 🟡 0.
-- [x] 개념도(CONCEPT.md) — "300kW 계산기" 프레이밍을 버리고 6항목 입력
-      모델 + 4개 독립 판정 모듈 + 장기 "산업안전 대상판별기" 구조로 재작성
-- [x] 의사결정 로그(DECISIONS.md) 작성 — 제품 구조, 이름/프레이밍,
-      승인 게이트, 100kW/300kW 근본원인, 건설공사 규모기준 발견/제외
-      확정, 위저드 UX, Regulatory Map, 2023-50호 확정, 모듈3 전제조건
-      발견까지 전부 기록
-- [x] 로드맵(ROADMAP.md) 작성 — Phase 5(건설공사 대상판별)로 분리
-- [ ] **다음이 바로 STEP 5(Engine 설계) 착수** — RULE-CONTRACT.md는
-      승인됐으므로 코드 작성 시작 가능. 다만 STEP 5 설계 시 RULE-
-      CONTRACT.md에 명시된 대로 `status`(TARGET/NOT_TARGET/UNKNOWN) +
-      `applicability`(APPLICABLE/NOT_APPLICABLE_TO_WORK_TYPE) 이원
-      필드를 Engine 데이터 모델에 반드시 반영할 것
-- [ ] law-basis.js/engine.js/data.js/state.js/report.js/ui.js — 전부
-      아직 없음. 이제는 작성 가능하나, **아직 작성 시작 안 함**
-      (검토자가 "코드 작성으로 넘어가라"고 명시적으로 지시하기 전까지는
-      계속 대기)
-- [ ] 테스트 없음, 배포 설정 없음
+- [x] STEP 1~4, RULE-CONTRACT.md 승인(2026-09-25, commit 3b49e91) — 위
+      이력은 그대로 유지(세션2~4 내용 아래 참고)
+- [x] **STEP 5(Engine 설계·구현) 완료(세션5, 2026-09-26)** — 검토자의
+      명시적 지시("STEP 5 — Engine 설계 착수")를 받고 진행:
+      - `law-basis.js`: RULE-CONTRACT.md 조문 원문을 그대로 옮긴 근거
+        레지스트리, 전부 `Object.freeze`. 13개 업종 목록 포함.
+      - `data.js`: THRESHOLDS(300/100/100/3톤/50kg·50kW/1000kg/60·150㎥분)
+        등 수치 상수만 분리.
+      - `engine.js`: 4개 모듈 pure function, 3치 논리(and3/or3)로
+        UNKNOWN을 1급 상태로 취급, `status`+`applicability` 이원 필드,
+        `finalStatus`/`determinationCompleteness` 독립 집계(APPLICABLE
+        모듈만 대상), Snapshot 반환은 깊은 `Object.freeze`.
+      - `tests.js`: 51개 테스트 전체 통과(모듈별 경계값 A~D, 종합 시나리오
+        E1~E4 회귀고정, Invariant 1~9 전부 자동검증). `npm test`로 실행.
+      - `ENGINE-DESIGN.md`: 설계 전체 기록 + **미해결 쟁점 2건**(임의로
+        해결 안 하고 기록만 함): OPEN-ISSUE-M4-1(모듈4 기본기준표 vs
+        고시 제2조제1항제6호 변경트리거의 결합 방식이 RULE-CONTRACT.md에
+        명시 안 됨 — 지금은 기본기준표만 구현), OPEN-ISSUE-M4-2(화학설비
+        안전보건규칙 별표9 수치표·시행령 제43조제2항 제외설비 목록이
+        RULE-CONTRACT.md에 없어 boolean 입력으로 대체, 미입력시 UNKNOWN).
+      - **UI/Regulatory Map/Report는 아직 구현 안 함**(이번 단계 범위
+        밖 — 검토자 지시 2번). RULE-CONTRACT.md는 이번 세션에서 수정
+        안 함(코드만 작성, 법적 조건 재해석 없음).
+- [ ] 다음: STEP 6 이후(Report/UI/Regulatory Map) — 검토자의 명시적
+      지시 대기. 착수 전 OPEN-ISSUE-M4-1(모듈4 증설 시 판정방식)은
+      RULE-CONTRACT.md 재검토가 먼저 필요할 수 있음(코드로 추측 금지).
+- [ ] 배포 설정 없음, git push 아직 안 함(로컬 커밋만) — 이 세션에서
+      마지막으로 확인할 것
+
+## 세션2~4 이력 (STEP 1~4, 참고용 — 위 STEP5 완료로 대체되지 않음)
+
+- Phase 0.5 원문 검증(세션2·3): 100kW(고시 제2조제1항제5호 가/나목),
+  5종 설비 변경트리거(제6호 가~마목) 조번호 확정. 신구조문대비표로
+  고시 제2023-50호 반영(가목 "동일 제조사·동일 모델 제외" 단서 신설
+  확정). 미해소 법적 항목 0건.
+- 제품 관점 재감사(세션4, 4차): 모듈독립성/3상태(TARGET·NOT_TARGET·
+  UNKNOWN)/조건부STEP/판정경로 UX → finalStatus+determinationCompleteness
+  이원 구조 → 모듈3(이설) 누락 전제조건 발견·수정(🔴급) → STEP2·3 노출
+  근거 표현 정밀화. 4개 시나리오 데스크체크 통과, 최종 🔴 0/🟡 0으로
+  **RULE-CONTRACT.md 승인됨: 2026-09-25**.
 
 ## 다음 세션에서 할 일 (우선순위 순)
 
-1. RULE-CONTRACT.md는 **승인됨(2026-09-25)**. 이 대화(또는 사용자
-   메시지)에서 STEP 5(Engine 설계) 착수 지시가 있었는지 먼저 확인 —
-   명시적 지시 없이 스스로 판단해서 코드부터 쓰지 말 것(세션1의 실패를
-   반복하지 않는다).
-2. STEP 5 설계 시 필수 반영 사항 (RULE-CONTRACT.md 참고):
-   - law-basis.js: 모듈 1~4의 조문 원문을 그대로 옮김(요약·재구성 금지).
-     모듈2는 "동일 제조사·동일 모델 제외" 예외 로직 포함 필수. 모듈3에는
-     모듈1과 같은 업종+계약용량 전제조건이 있음(세션4 3차 재감사로
-     추가됨 — 놓치기 쉬우니 주의).
-   - engine.js: 4개 모듈을 각각 pure function으로, 항상 4개 다 평가
-     (short-circuit 금지). 각 모듈 결과는 `status`(TARGET/NOT_TARGET/
-     UNKNOWN) + `applicability`(APPLICABLE/NOT_APPLICABLE_TO_WORK_TYPE)
-     이원 필드. `finalStatus`/`determinationCompleteness` 집계 로직도
-     RULE-CONTRACT.md의 규칙 그대로. self-test 포함.
-   - UI/Regulatory Map: Snapshot을 그대로 시각화만 하고 자체 판정
-     로직을 갖지 않음(Input→Engine→Snapshot→Map→Report 순서 고정).
-3. 그 다음부터는 safety-cert-checker 순서(Engine self-test → Snapshot →
-   Report → UI → QA)를 그대로 따라간다
+1. STEP 5(Engine 설계·구현)는 **완료**됐다(세션5, 2026-09-26, 로컬
+   커밋 — 커밋 해시는 아래 Git 절 확인). ENGINE-DESIGN.md부터 읽고
+   시작할 것 — 특히 "10. 미해결 쟁점"(OPEN-ISSUE-M4-1, M4-2)을 먼저
+   확인.
+2. 이 대화(또는 사용자 메시지)에서 STEP 6(Report/UI/Regulatory Map)
+   착수 지시가 있었는지 먼저 확인 — 명시적 지시 없이 스스로 판단해서
+   코드부터 쓰지 말 것.
+3. STEP 6 착수 시 필수 원칙(ENGINE-DESIGN.md 그대로): Report/UI는
+   `evaluate()`가 반환한 Snapshot을 그대로 시각화만 하고, 자체 판정
+   로직(예: `if (kw >= 100)`)을 절대 갖지 않는다. law-basis.js/data.js/
+   engine.js/tests.js는 원칙적으로 무변경 — 정말 필요하면 먼저 중단하고
+   보고(safety-cert-checker와 동일 원칙).
+4. OPEN-ISSUE-M4-1(모듈4 증설 시 판정방식)은 UI를 만들면서 임의로
+   해결하지 말 것 — RULE-CONTRACT.md 재검토·재승인이 먼저 필요할 수
+   있음. UI에서는 일단 "기본기준표만 반영, 변경트리거는 별도 확인
+   필요"로 두거나, 사용자에게 이 쟁점부터 질의할 것.
 
 ## 절대 하지 말 것
 
