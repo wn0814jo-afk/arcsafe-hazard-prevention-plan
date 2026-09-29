@@ -22,7 +22,7 @@
 const { LAW_BASIS, INDUSTRY_LIST, RULE_VERSION } = require('./law-basis.js');
 const { THRESHOLDS, WORK_TYPE } = require('./data.js');
 
-const ENGINE_VERSION = '0.1.0';
+const ENGINE_VERSION = '0.2.0';
 
 const STATUS = Object.freeze({
   TARGET: 'TARGET',
@@ -215,84 +215,129 @@ function statusToThreeValued(status) {
 }
 
 // ---------------------------------------------------------------------------
-// 모듈 4 — 대상설비 5종 (RULE-CONTRACT.md ## 판정 모듈 4)
+// 모듈 4 — 대상설비 5종 (RULE-CONTRACT.md ## 판정 모듈 4, 세션5 재작성)
 //
-// OPEN-ISSUE-M4-1 (임의로 해결하지 않고 기록만 함):
-// RULE-CONTRACT.md는 (a) 5종 설비의 기본 판정기준표(NOTICE_3)와
-// (b) "주요구조부분 변경" 트리거 목록(NOTICE_2_1_6, 고시 제2조제1항제6호
-// 가~마목)을 둘 다 문서화했지만, 이 둘이 작업형태별로 어떻게 결합되는지
-// (예: 증설·교체·개조일 때 (b)만 보는지, (a)와 (b)를 OR로 합치는지)를
-// 명시하지 않았다. 아래 구현은 (a) 기본 판정기준표만 사용하고, 이는
-// RULE-CONTRACT.md의 모듈4 "결과" 문장("업종·전기용량 요건 불필요, 설비
-// 요건만으로 확정")이 명시적으로 정의한 부분이다. (b)는 아직 구현하지
-// 않았다 — 추측으로 결합 로직을 만들지 않는다(STEP 5 지시 1번).
+// 세션5에서 법 제42조제1항제2호 원문("설치·이전하거나 그 주요 구조부분을
+// 변경하려는 경우")을 확보해 OPEN-ISSUE-M4-1을 해소했다. 모듈4는 작업형태에
+// 따라 배타적으로 다른 경로를 평가한다(모듈1~3과 동일한 패턴):
+//   - 신설/전체이전 → M4-설치/이전 (NOTICE_3 기준표)
+//   - 증설·교체·개조 → M4-주요구조부분변경 (NOTICE_2_1_6 가~마목)
+//   - 이설(부분이전) → 법적 근거 미확정(OPEN-ISSUE-M4-RELOCATION-PARTIAL) → UNKNOWN
+// 두 경로를 동시에 계산해 OR로 합치지 않는다 — 현재 작업형태에 해당하는
+// 경로만 평가한다(검토자 지적: workType이 MODIFICATION인데 input.equipment가
+// 기준표를 충족한다고 해서 설치경로가 TARGET에 기여하면 안 됨).
 // ---------------------------------------------------------------------------
 
 function evaluateModule4(input) {
-  const eq = input.equipment;
+  const installation = evaluateM4Installation(input.equipment, input.workType);
+  const modification = evaluateM4Modification(input.equipmentChange, input.workType);
 
-  // STEP4 자체를 아직 안 받은 경우(화면에 도달 안 함) 전체가 UNKNOWN.
-  if (eq === undefined) {
-    return buildModule4Result(STATUS.UNKNOWN, {}, '대상설비 해당 여부 정보가 없어 판단할 수 없음');
+  let status;
+  if (input.workType === WORK_TYPE.NEW || input.workType === WORK_TYPE.FULL_RELOCATION) {
+    status = installation.status;
+  } else if (input.workType === WORK_TYPE.MODIFICATION) {
+    status = modification.status;
+  } else if (input.workType === WORK_TYPE.PARTIAL_RELOCATION) {
+    // OPEN-ISSUE-M4-RELOCATION-PARTIAL: 법적 근거 미확정 — 추측해서
+    // TARGET/NOT_TARGET을 만들지 않는다. 항상 UNKNOWN.
+    status = STATUS.UNKNOWN;
+  } else {
+    status = STATUS.UNKNOWN;
   }
-  // 사용자가 "없음"을 명시적으로 답한 경우 — 확정된 정보이므로 NOT_TARGET.
-  if (eq.none === true) {
-    return buildModule4Result(STATUS.NOT_TARGET, {}, '대상설비 없음으로 확인됨');
-  }
 
-  const meltingFurnace = evaluateMeltingFurnace(eq.meltingFurnace);
-  const chemicalEquipment = evaluateChemicalEquipment(eq.chemicalEquipment);
-  const dryingEquipment = evaluateDryingEquipment(eq.dryingEquipment);
-  const gasWeldingAssembly = evaluateGasWeldingAssembly(eq.gasWeldingAssembly);
-  const ventilation = evaluateVentilation(eq.ventilation);
+  const reason = describeModule4(input.workType, status, installation, modification);
 
-  const equipmentResults = {
-    meltingFurnace,
-    chemicalEquipment,
-    dryingEquipment,
-    gasWeldingAssembly,
-    ventilation,
-  };
-
-  const three = or3(
-    meltingFurnace.three,
-    chemicalEquipment.three,
-    dryingEquipment.three,
-    gasWeldingAssembly.three,
-    ventilation.three
-  );
-  const status = toStatus(three);
-  const reason = describeModule4(status, equipmentResults);
-
-  return buildModule4Result(status, equipmentResults, reason);
-}
-
-function buildModule4Result(status, equipmentResults, reason) {
   return {
     ruleId: 'M4',
     status,
     applicability: APPLICABILITY.APPLICABLE, // 모듈4는 항상 독립 평가 — applicability 분기 없음
-    legalBasis: [LAW_BASIS.DECREE_42_2.ruleId, LAW_BASIS.NOTICE_3.ruleId],
+    legalBasis: [LAW_BASIS.DECREE_42_2.ruleId],
     reason,
-    equipmentResults,
+    paths: { installation, modification },
+    unresolvedLegalIssue:
+      input.workType === WORK_TYPE.PARTIAL_RELOCATION ? 'OPEN-ISSUE-M4-RELOCATION-PARTIAL' : undefined,
   };
 }
 
-function describeModule4(status, results) {
+function describeModule4(workType, status, installation, modification) {
+  if (workType === WORK_TYPE.PARTIAL_RELOCATION) {
+    return '이설(부분이전) 시 모듈4 판정기준이 RULE-CONTRACT.md에 미확정 — OPEN-ISSUE-M4-RELOCATION-PARTIAL';
+  }
+  const path = workType === WORK_TYPE.MODIFICATION ? modification : installation;
   if (status === STATUS.TARGET) {
-    const hit = Object.entries(results).find(([, r]) => r && r.three === true);
+    const hit = Object.entries(path.equipmentResults || {}).find(([, r]) => r && r.three === true);
     return hit ? `${hit[0]}: ${hit[1].reason}` : '대상설비 조건 충족';
   }
   if (status === STATUS.UNKNOWN) return '대상설비 세부조건 일부 미입력';
   return '입력된 대상설비 전부 조건 불충족';
 }
 
-// 각 설비 평가 함수 — evaluateMeltingFurnace() 등, 법적 규칙 단위로 분리
+// ---------------------------------------------------------------------------
+// M4-설치/이전 — 고시 제3조 기준표 (신설/전체이전에만 적용)
+// ---------------------------------------------------------------------------
+
+function evaluateM4Installation(eq, workType) {
+  const applicability =
+    workType === WORK_TYPE.NEW || workType === WORK_TYPE.FULL_RELOCATION
+      ? APPLICABILITY.APPLICABLE
+      : APPLICABILITY.NOT_APPLICABLE_TO_WORK_TYPE;
+
+  if (applicability !== APPLICABILITY.APPLICABLE) {
+    return { ruleId: 'M4-INSTALL', status: STATUS.NOT_TARGET, applicability, equipmentResults: {} };
+  }
+
+  // STEP4 자체를 아직 안 받은 경우(화면에 도달 안 함) 전체가 UNKNOWN.
+  if (eq === undefined) {
+    return {
+      ruleId: 'M4-INSTALL',
+      status: STATUS.UNKNOWN,
+      applicability,
+      equipmentResults: {},
+      reason: '대상설비 해당 여부 정보가 없어 판단할 수 없음',
+    };
+  }
+  // 사용자가 "없음"을 명시적으로 답한 경우 — 확정된 정보이므로 NOT_TARGET.
+  if (eq.none === true) {
+    return {
+      ruleId: 'M4-INSTALL',
+      status: STATUS.NOT_TARGET,
+      applicability,
+      equipmentResults: {},
+      reason: '대상설비 없음으로 확인됨',
+    };
+  }
+
+  const equipmentResults = {
+    meltingFurnace: evaluateMeltingFurnace_Installation(eq.meltingFurnace),
+    chemicalEquipment: evaluateChemicalEquipment_Installation(eq.chemicalEquipment),
+    dryingEquipment: evaluateDryingEquipment_Installation(eq.dryingEquipment),
+    gasWeldingAssembly: evaluateGasWeldingAssembly_Installation(eq.gasWeldingAssembly),
+    ventilation: evaluateVentilation_Installation(eq.ventilation),
+  };
+
+  const three = or3(
+    equipmentResults.meltingFurnace.three,
+    equipmentResults.chemicalEquipment.three,
+    equipmentResults.dryingEquipment.three,
+    equipmentResults.gasWeldingAssembly.three,
+    equipmentResults.ventilation.three
+  );
+
+  return {
+    ruleId: 'M4-INSTALL',
+    status: toStatus(three),
+    applicability,
+    legalBasis: [LAW_BASIS.NOTICE_3.ruleId, LAW_BASIS.NOTICE_2_4.ruleId],
+    equipmentResults,
+  };
+}
+
+// 각 설비 평가 함수 — evaluateXxx_Installation(), 법적 규칙 단위로 분리
 // (STEP 5 지시 11번). eq가 present!==true(선택 안 함)면 그 설비는 논의 대상이
 // 아니므로 3치 결과는 false(그 설비로 인한 TARGET 사유는 없음)로 취급한다.
 // present는 true인데 세부 수치가 없으면 unknown.
 
-function evaluateMeltingFurnace(eq) {
+function evaluateMeltingFurnace_Installation(eq) {
   if (!eq || eq.present !== true) {
     return { three: false, reason: '해당 없음' };
   }
@@ -306,32 +351,33 @@ function evaluateMeltingFurnace(eq) {
   };
 }
 
-function evaluateChemicalEquipment(eq) {
+function evaluateChemicalEquipment_Installation(eq) {
   if (!eq || eq.present !== true) {
     return { three: false, reason: '해당 없음' };
   }
-  // OPEN-ISSUE-M4-2: 안전보건규칙 별표9 물질별 기준량 수치, 시행령
-  // 제43조제2항 제외설비 목록 모두 RULE-CONTRACT.md에 수치가 없다
-  // (law-basis.js NOTICE_3.openItems 참고) — 호출자가 판정한 boolean만
-  // 받는다. 이 값이 없으면 engine은 UNKNOWN으로 남긴다(추측 금지).
+  // OPEN-ISSUE(별표9): 안전보건규칙 별표9 물질별 기준량 수치는 이 저장소
+  // 범위 밖 — 호출자가 판정한 boolean만 받는다(law-basis.js NOTICE_3.openItems
+  // 참고). 시행령 제43조제2항 제외설비 여부(excludedByDecree43_2)는 세션5에서
+  // 근거가 확정됐다(DECREE_43_2 참고) — "시행령 제43조제2항에서 정한 설비에
+  // 해당하여 고시 제3조제2호의 화학설비 대상에서 제외되는가?"를 의미한다.
   const meetsThreshold = eq.meetsHazardousSubstanceThreshold; // boolean | undefined
   const excluded = eq.excludedByDecree43_2 === true;
 
   if (excluded) {
-    return { three: false, reason: '시행령 제43조제2항 제외설비로 확인됨' };
+    return { three: false, reason: '시행령 제43조제2항 제외설비로 확인됨(고시 제3조제2호 단서)' };
   }
   return {
     three: meetsThreshold === undefined ? undefined : Boolean(meetsThreshold),
     reason:
       meetsThreshold === undefined
-        ? '위험물질 기준량 충족 여부 미확인(별표9 수치는 이 저장소 범위 밖 — OPEN-ISSUE-M4-2)'
+        ? '위험물질 기준량 충족 여부 미확인(별표9 수치는 이 저장소 범위 밖)'
         : meetsThreshold
         ? '안전보건규칙 별표9 위험물질 기준량 충족'
         : '안전보건규칙 별표9 위험물질 기준량 미충족',
   };
 }
 
-function evaluateDryingEquipment(eq) {
+function evaluateDryingEquipment_Installation(eq) {
   if (!eq || eq.present !== true) {
     return { three: false, reason: '해당 없음' };
   }
@@ -339,12 +385,7 @@ function evaluateDryingEquipment(eq) {
     gte(eq.fuelConsumptionKgPerHour, THRESHOLDS.EQUIPMENT_DRYING_FUEL_KG_PER_HOUR),
     gte(eq.ratedPowerKw, THRESHOLDS.EQUIPMENT_DRYING_RATED_POWER_KW)
   );
-  const purposeCondition =
-    eq.purpose === undefined
-      ? undefined
-      : eq.purpose === 'ORGANIC_COMPOUND' ||
-        eq.purpose === 'COATING_FLAMMABLE_VAPOR' ||
-        eq.purpose === 'COMBUSTIBLE_DUST';
+  const purposeCondition = isValidDryingPurpose(eq.purpose);
 
   const three = and3(sizeCondition, purposeCondition);
   return {
@@ -356,7 +397,7 @@ function evaluateDryingEquipment(eq) {
   };
 }
 
-function evaluateGasWeldingAssembly(eq) {
+function evaluateGasWeldingAssembly_Installation(eq) {
   if (!eq || eq.present !== true) {
     return { three: false, reason: '해당 없음' };
   }
@@ -373,7 +414,7 @@ function evaluateGasWeldingAssembly(eq) {
   };
 }
 
-function evaluateVentilation(eq) {
+function evaluateVentilation_Installation(eq) {
   if (!eq || eq.present !== true) {
     return { three: false, reason: '해당 없음' };
   }
@@ -386,6 +427,137 @@ function evaluateVentilation(eq) {
       : THRESHOLDS.EQUIPMENT_VENTILATION_PERMIT_OR_MANAGED_OR_DUST_M3_PER_MIN;
   const three = eq.exhaustAirVolumeM3PerMin >= threshold;
   return { three, reason: `배풍량 ${eq.exhaustAirVolumeM3PerMin}㎥/분 (기준 ${threshold}㎥/분)` };
+}
+
+// 건조설비의 "목적" 값이 고시 제3조제3호 각목(유기화합물건조/도료피막코팅표면
+// 건조/가연성분말분진) 중 하나에 해당하는지 — M4-설치와 M4-변경(경로B) 둘 다
+// 이 함수를 공유한다(제3조제3호 "목적분류"는 재사용, 크기기준은 재사용 안 함).
+function isValidDryingPurpose(purpose) {
+  if (purpose === undefined) return undefined;
+  return (
+    purpose === 'ORGANIC_COMPOUND' ||
+    purpose === 'COATING_FLAMMABLE_VAPOR' ||
+    purpose === 'COMBUSTIBLE_DUST'
+  );
+}
+
+// ---------------------------------------------------------------------------
+// M4-주요구조부분변경 — 고시 제2조제1항제6호 가~마목 (증설·교체·개조에만 적용)
+//
+// 전제(도입부 "~설비 중"): 각 목 전부 "해당 설비가 이미 고시 제3조 기준을
+// 충족하는 대상설비"라는 것을 전제한다 — existingTarget 입력으로 받는다.
+// 이 값은 Engine이 다시 계산하는 게 아니라 호출자가 넘기는 입력 사실이다
+// (검토자 지적: "기존 대상설비 여부"와 "현재 변경행위"를 한 Engine 안에서
+// 순환적으로 섞지 않기 위함) — Snapshot에도 입력 그대로 기록된다.
+// ---------------------------------------------------------------------------
+
+function evaluateM4Modification(change, workType) {
+  const applicability =
+    workType === WORK_TYPE.MODIFICATION
+      ? APPLICABILITY.APPLICABLE
+      : APPLICABILITY.NOT_APPLICABLE_TO_WORK_TYPE;
+
+  if (applicability !== APPLICABILITY.APPLICABLE) {
+    return { ruleId: 'M4-CHANGE', status: STATUS.NOT_TARGET, applicability, equipmentResults: {} };
+  }
+
+  // 검토자 지적: 증설·교체·개조 작업인데 equipmentChange 자체가 없으면
+  // "변경 대상이 없다"(false)가 아니라 "입력 자체가 없다"(UNKNOWN)다.
+  if (change === undefined) {
+    return {
+      ruleId: 'M4-CHANGE',
+      status: STATUS.UNKNOWN,
+      applicability,
+      equipmentResults: {},
+      reason: '대상설비 변경사항 정보가 없어 판단할 수 없음',
+    };
+  }
+
+  const equipmentResults = {
+    meltingFurnace: evaluateMeltingFurnace_Change(change.meltingFurnace),
+    chemicalEquipment: evaluateChemicalEquipment_Change(change.chemicalEquipment),
+    dryingEquipment: evaluateDryingEquipment_Change(change.dryingEquipment),
+    gasWeldingAssembly: evaluateGasWeldingAssembly_Change(change.gasWeldingAssembly),
+    ventilation: evaluateVentilation_Change(change.ventilation),
+  };
+
+  const three = or3(
+    equipmentResults.meltingFurnace.three,
+    equipmentResults.chemicalEquipment.three,
+    equipmentResults.dryingEquipment.three,
+    equipmentResults.gasWeldingAssembly.three,
+    equipmentResults.ventilation.three
+  );
+
+  return {
+    ruleId: 'M4-CHANGE',
+    status: toStatus(three),
+    applicability,
+    legalBasis: [LAW_BASIS.NOTICE_2_1_6.ruleId],
+    equipmentResults,
+  };
+}
+
+// eq가 아예 없으면(해당 설비에 대한 응답 자체가 없으면) 그 설비는 판정할
+// 정보가 없다는 뜻 — false가 아니라 undefined(그 설비 자체는 or3 결합에서
+// unknown으로 잡히되, existingTarget이 명시적으로 false면 and3가 그 즉시
+// NOT_TARGET으로 확정한다).
+
+function evaluateMeltingFurnace_Change(eq) {
+  if (!eq) return { three: undefined, reason: '변경사항 정보 없음' };
+  const three = and3(toThreeValued(eq.existingTarget), toThreeValued(eq.heatSourceTypeChanged));
+  return { three, reason: describeChangeReason(three, '용해로 열원 종류 변경') };
+}
+
+function evaluateChemicalEquipment_Change(eq) {
+  if (!eq) return { three: undefined, reason: '변경사항 정보 없음' };
+  const trigger = or3(
+    toThreeValued(eq.productionOrMaterialChangeReplacement),
+    toThreeValued(eq.managedSubstanceEquipmentChangeCausingVelocityDecreaseOrAirflowIncrease)
+  );
+  const three = and3(toThreeValued(eq.existingTarget), trigger);
+  return { three, reason: describeChangeReason(three, '화학설비 교체·변경·추가 또는 유해물질설비 변경') };
+}
+
+function evaluateDryingEquipment_Change(eq) {
+  if (!eq) return { three: undefined, reason: '변경사항 정보 없음' };
+  const existingTarget = toThreeValued(eq.existingTarget);
+
+  // 경로A: 열원 종류 변경
+  const pathA = and3(existingTarget, toThreeValued(eq.heatSourceTypeChanged));
+  // 경로B: 건조대상물 변경 + 신규 목적이 제3조제3호 각목 재해당(크기기준 재적용 안 함)
+  const pathB = and3(
+    existingTarget,
+    toThreeValued(eq.dryingTargetChanged),
+    isValidDryingPurpose(eq.newPurpose)
+  );
+
+  const three = or3(pathA, pathB);
+  return { three, reason: describeChangeReason(three, '건조설비 열원종류 변경 또는 건조대상물 변경') };
+}
+
+function evaluateGasWeldingAssembly_Change(eq) {
+  if (!eq) return { three: undefined, reason: '변경사항 정보 없음' };
+  const three = and3(toThreeValued(eq.existingTarget), toThreeValued(eq.mainPipeStructureChanged));
+  return { three, reason: describeChangeReason(three, '가스집합용접장치 주관 구조 변경') };
+}
+
+function evaluateVentilation_Change(eq) {
+  if (!eq) return { three: undefined, reason: '변경사항 정보 없음' };
+  const three = and3(
+    toThreeValued(eq.existingTarget),
+    toThreeValued(eq.equipmentChangeCausingVelocityDecreaseOrAirflowIncrease)
+  );
+  return { three, reason: describeChangeReason(three, '유해물질/분진 설비 추가·변경으로 풍속감소·배풍량증가') };
+}
+
+function toThreeValued(value) {
+  return value === undefined ? undefined : Boolean(value);
+}
+
+function describeChangeReason(three, label) {
+  if (three === undefined) return `${label} — 기존 대상설비 여부 또는 변경사항 정보 없음`;
+  return three ? `${label}: 조건 충족` : `${label}: 조건 불충족`;
 }
 
 // ---------------------------------------------------------------------------

@@ -20,7 +20,7 @@ function basis(entry) {
   return Object.freeze({ ...entry });
 }
 
-const RULE_VERSION = 'RULE-CONTRACT@approved-2026-09-25(commit-3b49e91)';
+const RULE_VERSION = 'RULE-CONTRACT@M4-reapproved-2026-09-26(commit-2feffff)';
 
 const LAW_BASIS = Object.freeze({
   // 모듈 1의 근거이자, 모듈 2·3의 공통 전제조건("영 제42조제1항에
@@ -96,29 +96,65 @@ const LAW_BASIS = Object.freeze({
       '5) 유해물질 밀폐·환기·배기설비: 안전보건규칙 제422~608조 관련 국소배기장치(이동식 ' +
       '제외)/밀폐설비/전체환기설비 — 안전검사절차고시 별표1 제7호 유해물질은 배풍량 ' +
       '60㎥/분 이상, 그 외 허가/관리대상물질 또는 별표16 분진작업은 배풍량 150㎥/분 이상.',
-    reliability: 'PRIMARY', // 🟢 moel.go.kr 공식 FAQ 원문 확인
+    reliability: 'PRIMARY', // 🟢 moel.go.kr 공식 FAQ 원문 확인 + U-LEX/law.go.kr 고시 제3조 원문 대조(세션5)
     openItems: [
-      // RULE-CONTRACT.md는 이 두 항목의 구체적 수치표를 인용하지 않았다.
-      // 별표9/시행령 제43조제2항의 실제 물질별 기준량·제외설비 목록을
-      // engine.js가 스스로 계산하지 않는다 — 호출자가 별도로 판정해
-      // boolean으로 넘겨야 한다(law-basis.js/engine.js가 임의로 수치를
-      // 추가하지 않는다는 원칙, STEP 5 지시 2번 참고).
+      // 세션5 정정: 화학설비 제외조항(시행령 제43조제2항) 자체는 확정됨(DECREE_43_2 참고).
+      // 남은 미해결은 별표9 물질별 기준량 수치표뿐이다.
       'EQUIPMENT_CHEMICAL_HAZARDOUS_SUBSTANCE_THRESHOLD_TABLE(안전보건규칙 별표9)의 ' +
         '물질별 기준량 수치는 RULE-CONTRACT.md에 인용되지 않았다 — LEGAL SOURCE BLOCKED, ' +
         'engine은 meetsHazardousSubstanceThreshold(boolean)를 입력으로 받는다.',
-      'EQUIPMENT_CHEMICAL_DECREE_43_2_EXCLUSION(시행령 제43조제2항 제외설비 목록)도 ' +
-        '동일하게 RULE-CONTRACT.md에 목록이 없다 — engine은 excludedByDecree43_2(boolean)를 ' +
-        '입력으로 받는다.',
     ],
     ruleContractRef: 'RULE-CONTRACT.md ## 판정 모듈 4',
   }),
 
+  // 세션5 정정: 이전 세션에서 "시행령 제43조제2항은 PSM(공정안전보고서) 조문이므로
+  // 혼입 오류"라고 판단했던 것은 틀렸다 — 고시 제3조제2호 원문이 이 조문을
+  // 명시적으로 인용한다(U-LEX/law.go.kr 고시 원문 재대조로 확정). 시행령 제43조가
+  // "공정안전보고서의 제출 대상"이라는 제목을 가진 것과, 유해위험방지계획서 고시가
+  // 그 제2항(제외설비 목록)만 준용하는 것은 모순이 아니다 — 법령은 원래 다른
+  // 조문을 인용/준용하는 경우가 흔하다.
+  DECREE_43_2: basis({
+    ruleId: 'DECREE_43_2',
+    statute: '산업안전보건법 시행령 제43조제2항',
+    text:
+      '제1항에도 불구하고 다음 각 호의 설비는 유해하거나 위험한 설비로 보지 않는다: ' +
+      '1) 원자력 설비, 2) 군사시설, 3) 사업주가 해당 사업장 내에서 직접 사용하기 위한 ' +
+      '난방용 연료의 저장설비 및 사용설비, 4) 도매·소매시설, 5) 차량 등의 운송설비, ' +
+      '6) 「액화석유가스의 안전관리 및 사업법」에 따른 액화석유가스의 충전·저장시설, ' +
+      '7) 「도시가스사업법」에 따른 가스공급시설, 8) 그 밖에 고용노동부장관이 누출·화재·' +
+      '폭발 등의 사고가 있더라도 그에 따른 피해의 정도가 크지 않다고 인정하여 고시하는 설비.',
+    reliability: 'PRIMARY', // 🟢 law.go.kr 원문(세션5 확보)
+    note:
+      '이 조문 자체는 시행령 제43조("공정안전보고서의 제출 대상")의 일부이지만, ' +
+      '고시 제3조제2호(NOTICE_3)가 화학설비 정의에서 "단, 영 제43조제2항에서 정한 ' +
+      '설비는 제외"라고 명시적으로 인용하므로 이 저장소의 화학설비(모듈4) 판정에도 ' +
+      '유효한 근거다 — PSM 혼입이 아니다(세션5에서 재확인, 이전 세션의 "혼입 오류" ' +
+      '판단은 폐기됨).',
+    ruleContractRef: 'RULE-CONTRACT.md ## 판정 모듈 4 (M4-설치/이전 표)',
+  }),
+
+  // 고시 제2조제4호 — "이전"의 정의. 법 제42조제1항 제1호·제2호 공통 정의이며,
+  // 모듈1(전체이전)과 모듈4(설치/이전 경로)에 공통 적용된다.
+  NOTICE_2_4: basis({
+    ruleId: 'NOTICE_2_4',
+    statute: '제조업 등 유해·위험방지계획서 제출·심사·확인에 관한 고시 제2조제4호',
+    text:
+      '법 제42조제1항 제1호 및 제2호에서 "이전"이란 건설물·기계·기구 및 설비 등 ' +
+      '일체를 다른 단위공장 또는 다른 지역으로 옮겨서 설치하는 것을 말한다.',
+    reliability: 'PRIMARY', // 🟢 U-LEX/law.go.kr 원문(세션5 확보)
+    note:
+      '"일체"를 옮기는 것(전체이전)만 이 정의에 해당한다. "일부"를 옮기는 것은 ' +
+      '모듈1·4에는 대응 정의가 없다 — 모듈3(이설)의 "일부 이설" 정의(NOTICE_2_1_5_NA)는 ' +
+      '법 제42조제1항제1호 전용이며 모듈4에 임의로 확장하지 않는다 ' +
+      '(OPEN-ISSUE-M4-RELOCATION-PARTIAL, RULE-CONTRACT.md 참고).',
+    ruleContractRef: 'RULE-CONTRACT.md ## 판정 모듈 4 (OPEN-ISSUE-M4-RELOCATION-PARTIAL)',
+  }),
+
   // 고시 제2조제1항제6호 가~마목 — "주요구조부분 변경" 트리거.
-  // RULE-CONTRACT.md에 조문 원문은 확정돼 있으나, 이 트리거가
-  // 모듈4의 TARGET 판정에 "기본 기준표(NOTICE_3)와 별도로 어떻게
-  // 결합되는지"는 RULE-CONTRACT.md가 명시하지 않았다. 아래 engine.js
-  // 주석 OPEN-ISSUE-M4-1 참고 — 이 항목은 현재 engine.js가 사용하지
-  // 않는다(추측으로 결합 로직을 만들지 않기 위함).
+  // 세션5에서 법 제42조제1항제2호 원문("설치·이전하거나 그 주요 구조부분을
+  // 변경하려는 경우")을 확보해 결합 방식을 확정했다: NOTICE_3(설치/이전 기준)과
+  // NOTICE_2_1_6(변경 기준)은 작업형태별로 배타적으로 적용되는 별도 경로다.
+  // engine.js가 이제 이 조문을 사용한다(M4-CHANGE 경로).
   NOTICE_2_1_6: basis({
     ruleId: 'NOTICE_2_1_6',
     statute:
@@ -126,6 +162,9 @@ const LAW_BASIS = Object.freeze({
     noticeNo: '고용노동부고시 제2023-50호(가~마 조문 자체는 개정 없음)',
     effectiveDate: '2023-10-12',
     text:
+      '법 제42조제1항제2호에 따른 "주요 구조부분을 변경"이란 영 제42조제2항의 유해 ' +
+      '또는 위험한 작업 및 장소에서 사용하는 기계·기구 및 설비 중 다음 각 목과 같은 ' +
+      '사항을 변경하는 경우를 말한다. ' +
       '가) 용해로: 열원의 종류를 변경하는 경우. ' +
       '나) 화학설비: 생산량 증가·원료 또는 제품 변경을 위한 대상 화학설비의 교체·변경·추가, ' +
       '또는 관리대상 유해물질 관련 설비의 추가·변경으로 후드 제어풍속 감소 또는 배풍기 ' +
@@ -137,10 +176,12 @@ const LAW_BASIS = Object.freeze({
       '배풍기 배풍량 증가.',
     reliability: 'PRIMARY', // 🟢 신구조문대비표: 전부 "현행과 같음"
     note:
-      'engine.js는 현재 이 조문을 사용하지 않는다 — RULE-CONTRACT.md가 이 트리거와 ' +
-      'NOTICE_3 기준표의 결합 방식(작업형태별로 어느 쪽을 적용하는지)을 명시하지 않았기 ' +
-      '때문에 임의로 결합 로직을 만들지 않고 OPEN-ISSUE-M4-1로 기록만 한다.',
-    ruleContractRef: 'RULE-CONTRACT.md ## 판정 모듈 4',
+      '도입부의 "~설비 중"이라는 문구가 모든 목에 공통되는 전제("이미 영 제42조제2항 ' +
+      '대상설비여야 한다")다. 다목(건조설비)만 "제3조제3호 각목"을 명시적으로 재인용 ' +
+      '(목적분류만 재사용, 50kg/h·50kW 크기기준은 재적용하지 않음) — 나머지 가·나·라·마 ' +
+      '목은 제3조의 수치기준을 변경경로에서 다시 계산하지 않는다(RULE-CONTRACT.md ' +
+      '"M4-주요구조부분변경" 절 참고).',
+    ruleContractRef: 'RULE-CONTRACT.md ## 판정 모듈 4 (M4-주요구조부분변경)',
   }),
 
   PSM_2_1_1_NOT_APPLICABLE: basis({

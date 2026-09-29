@@ -85,39 +85,38 @@ STEP 6  구현 (law-basis.js → engine.js → ... )
 
 
 
-## 지금 상태 (마지막 업데이트: 세션5, 2026-09-26 — STEP 5 Engine 설계·구현 완료)
+## 문서 역할 분리 (세션5부터 적용)
+
+- **RULE-CONTRACT.md** — 법적/제품 판정 계약의 SSOT. 조문 원문, 모듈
+  구조, 승인 상태는 전부 여기.
+- **ENGINE-DESIGN.md** — 구현 구조의 SSOT. Engine의 함수 구조, Snapshot
+  스키마, 테스트 매트릭스, 미해결 쟁점(OPEN-ISSUE)은 전부 여기.
+- **CLAUDE.md(이 파일)** — 개발자가 지켜야 할 작업 규칙과 "지금 뭘 하면
+  되는지"만. 법적 판단 내용을 여기에 다시 옮겨적지 않는다 — 필요하면
+  위 두 문서를 읽는다.
+
+## 지금 상태 (마지막 업데이트: 세션5, 2026-09-26 — STEP 5 Engine 0.2.0, M4 재설계 포함)
 
 - [x] 저장소 생성 완료 (wn0814jo-afk/arcsafe-hazard-prevention-plan, public)
-- [x] STEP 1~4, RULE-CONTRACT.md 승인(2026-09-25, commit 3b49e91) — 위
-      이력은 그대로 유지(세션2~4 내용 아래 참고)
-- [x] **STEP 5(Engine 설계·구현) 완료(세션5, 2026-09-26)** — 검토자의
-      명시적 지시("STEP 5 — Engine 설계 착수")를 받고 진행:
-      - `law-basis.js`: RULE-CONTRACT.md 조문 원문을 그대로 옮긴 근거
-        레지스트리, 전부 `Object.freeze`. 13개 업종 목록 포함.
-      - `data.js`: THRESHOLDS(300/100/100/3톤/50kg·50kW/1000kg/60·150㎥분)
-        등 수치 상수만 분리.
-      - `engine.js`: 4개 모듈 pure function, 3치 논리(and3/or3)로
-        UNKNOWN을 1급 상태로 취급, `status`+`applicability` 이원 필드,
-        `finalStatus`/`determinationCompleteness` 독립 집계(APPLICABLE
-        모듈만 대상), Snapshot 반환은 깊은 `Object.freeze`.
-      - `tests.js`: 51개 테스트 전체 통과(모듈별 경계값 A~D, 종합 시나리오
-        E1~E4 회귀고정, Invariant 1~9 전부 자동검증). `npm test`로 실행.
-      - `ENGINE-DESIGN.md`: 설계 전체 기록 + **미해결 쟁점 2건**(임의로
-        해결 안 하고 기록만 함): OPEN-ISSUE-M4-1(모듈4 기본기준표 vs
-        고시 제2조제1항제6호 변경트리거의 결합 방식이 RULE-CONTRACT.md에
-        명시 안 됨 — 지금은 기본기준표만 구현), OPEN-ISSUE-M4-2(화학설비
-        안전보건규칙 별표9 수치표·시행령 제43조제2항 제외설비 목록이
-        RULE-CONTRACT.md에 없어 boolean 입력으로 대체, 미입력시 UNKNOWN).
-      - **UI/Regulatory Map/Report는 아직 구현 안 함**(이번 단계 범위
-        밖 — 검토자 지시 2번). RULE-CONTRACT.md는 이번 세션에서 수정
-        안 함(코드만 작성, 법적 조건 재해석 없음).
-- [ ] 다음: STEP 6 이후(Report/UI/Regulatory Map) — 검토자의 명시적
-      지시 대기. 착수 전 OPEN-ISSUE-M4-1(모듈4 증설 시 판정방식)은
+- [x] STEP 1~4, RULE-CONTRACT.md 승인(2026-09-25, commit 3b49e91) —
+      세션2~4 이력은 아래 참고
+- [x] **STEP 5(Engine 설계·구현) 완료(세션5, 2026-09-26), Engine 0.2.0**
+      — `law-basis.js`/`data.js`/`engine.js`/`tests.js`(82/82 통과,
+      `npm test`) 작성 완료. 세부 구조는 **ENGINE-DESIGN.md**.
+      한 줄 요약: 4개 모듈 pure function, 3치 논리로 UNKNOWN을 1급
+      상태로 취급, `status`+`applicability` 이원 필드. **모듈4는
+      workType에 따라 installation(설치/전체이전, 고시 제3조)과
+      modification(주요구조부분변경, 고시 제2조제1항제6호) 경로를
+      배타적으로 평가한다. 이설(부분이전)은 법적 근거 미확정이라 항상
+      UNKNOWN(OPEN-ISSUE-M4-RELOCATION-PARTIAL)이다.** 세부 법적
+      판정근거·경계값·미해결 쟁점은 전부 RULE-CONTRACT.md/
+      ENGINE-DESIGN.md를 따른다.
+- [ ] **UI/Regulatory Map/Report는 아직 구현 안 함**(STEP 6 이후, 검토자
+      명시적 지시 대기). 착수 전 OPEN-ISSUE-M4-RELOCATION-PARTIAL은
       RULE-CONTRACT.md 재검토가 먼저 필요할 수 있음(코드로 추측 금지).
-- [ ] 배포 설정 없음, git push 아직 안 함(로컬 커밋만) — 이 세션에서
-      마지막으로 확인할 것
+- [ ] 아직 커밋만 하고 push 안 함 — 이 세션에서 마지막으로 확인할 것
 
-## 세션2~4 이력 (STEP 1~4, 참고용 — 위 STEP5 완료로 대체되지 않음)
+## 세션2~4 이력 (STEP 1~4, 참고용)
 
 - Phase 0.5 원문 검증(세션2·3): 100kW(고시 제2조제1항제5호 가/나목),
   5종 설비 변경트리거(제6호 가~마목) 조번호 확정. 신구조문대비표로
