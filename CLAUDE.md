@@ -95,7 +95,7 @@ STEP 6  구현 (law-basis.js → engine.js → ... )
   되는지"만. 법적 판단 내용을 여기에 다시 옮겨적지 않는다 — 필요하면
   위 두 문서를 읽는다.
 
-## 지금 상태 (마지막 업데이트: 세션5, 2026-09-26 — STEP 5 Engine 0.2.0, M4 재설계 포함)
+## 지금 상태 (마지막 업데이트: 세션5 인수인계 정리, 2026-09-30 — STEP 5 Engine 0.2.0 push 완료)
 
 - [x] 저장소 생성 완료 (wn0814jo-afk/arcsafe-hazard-prevention-plan, public)
 - [x] STEP 1~4, RULE-CONTRACT.md 승인(2026-09-25, commit 3b49e91) —
@@ -112,9 +112,14 @@ STEP 6  구현 (law-basis.js → engine.js → ... )
       판정근거·경계값·미해결 쟁점은 전부 RULE-CONTRACT.md/
       ENGINE-DESIGN.md를 따른다.
 - [ ] **UI/Regulatory Map/Report는 아직 구현 안 함**(STEP 6 이후, 검토자
-      명시적 지시 대기). 착수 전 OPEN-ISSUE-M4-RELOCATION-PARTIAL은
-      RULE-CONTRACT.md 재검토가 먼저 필요할 수 있음(코드로 추측 금지).
-- [ ] 아직 커밋만 하고 push 안 함 — 이 세션에서 마지막으로 확인할 것
+      명시적 지시 대기).
+- [x] Engine 0.2.0 기준점(commit a0a4ea5)은 origin/main에 push 완료.
+      이 파일 정리 커밋 이후의 최신 HEAD는 `git log`로 확인한다.
+- **현재 남은 M4 미해결 쟁점은 2건뿐이다** (세부 내용·처리 방침은
+  ENGINE-DESIGN.md "미해결 쟁점" 절과 RULE-CONTRACT.md 참조 — 여기에
+  법적 판단을 복제하지 않는다):
+  - `OPEN-ISSUE-M4-RELOCATION-PARTIAL` (모듈4 이설/일부이전)
+  - 화학설비 별표9 물질별 수치 기준표
 
 ## 세션2~4 이력 (STEP 1~4, 참고용)
 
@@ -130,10 +135,9 @@ STEP 6  구현 (law-basis.js → engine.js → ... )
 
 ## 다음 세션에서 할 일 (우선순위 순)
 
-1. STEP 5(Engine 설계·구현)는 **완료**됐다(세션5, 2026-09-26, 로컬
-   커밋 — 커밋 해시는 아래 Git 절 확인). ENGINE-DESIGN.md부터 읽고
-   시작할 것 — 특히 "10. 미해결 쟁점"(OPEN-ISSUE-M4-1, M4-2)을 먼저
-   확인.
+1. STEP 5(Engine 설계·구현)는 **완료**됐고 origin/main에 push됐다
+   (세션5, 기준점 commit a0a4ea5). ENGINE-DESIGN.md부터 읽고 시작할 것
+   — 특히 "미해결 쟁점" 절(위 "지금 상태"의 남은 2건)을 먼저 확인.
 2. 이 대화(또는 사용자 메시지)에서 STEP 6(Report/UI/Regulatory Map)
    착수 지시가 있었는지 먼저 확인 — 명시적 지시 없이 스스로 판단해서
    코드부터 쓰지 말 것.
@@ -142,10 +146,10 @@ STEP 6  구현 (law-basis.js → engine.js → ... )
    로직(예: `if (kw >= 100)`)을 절대 갖지 않는다. law-basis.js/data.js/
    engine.js/tests.js는 원칙적으로 무변경 — 정말 필요하면 먼저 중단하고
    보고(safety-cert-checker와 동일 원칙).
-4. OPEN-ISSUE-M4-1(모듈4 증설 시 판정방식)은 UI를 만들면서 임의로
-   해결하지 말 것 — RULE-CONTRACT.md 재검토·재승인이 먼저 필요할 수
-   있음. UI에서는 일단 "기본기준표만 반영, 변경트리거는 별도 확인
-   필요"로 두거나, 사용자에게 이 쟁점부터 질의할 것.
+4. 남은 미해결 쟁점(`OPEN-ISSUE-M4-RELOCATION-PARTIAL`, 별표9 수치표)은
+   UI/Report를 만들면서 임의로 해결하지 말 것 — 해결은 RULE-CONTRACT.md
+   재검토·재승인이 먼저다. Snapshot의 UNKNOWN은 NOT_TARGET으로 바꾸지
+   않고 그대로 표시하며, 사용자 안내 문구는 STEP 6 설계 단계에서 정한다.
 
 ## 절대 하지 말 것
 
