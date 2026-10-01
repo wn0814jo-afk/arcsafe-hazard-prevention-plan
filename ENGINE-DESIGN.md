@@ -293,12 +293,48 @@ RULE-CONTRACT.md는 화학설비 기준을 "안전보건규칙 별표9 위험물
 입력으로 받는다. 이 값이 없으면 `UNKNOWN`을 반환한다(tests.js D15,
 F3/F4로 검증) — safety-cert-checker의 "LEGAL SOURCE BLOCKED" 상태와
 같은 취급이다. 제외설비 여부(`excludedByDecree43_2`)는 위에서 설명한
-대로 이미 확정된 근거를 쓴다 — 남은 미해결은 **별표9 수치표 자체
-뿐**이다.
+대로 이미 확정된 근거를 쓴다 — 이 항목(별표9)에서 남은 미해결은
+**별표9 수치표 자체뿐**이다. (제외설비 여부가 입력상 UNKNOWN일 때의
+Engine 계약 처리는 별도 사항이다 — 아래
+OPEN-ISSUE-ENGINE-M4-CHEM-EXCLUSION-UNKNOWN 참고.)
 
 **필요한 다음 조치**: 별표9 원문(물질별 기준량 표)을 원문 대조해
 REGULATION-NOTES.md/RULE-CONTRACT.md에 추가한 뒤에만 engine.js가 이
 수치를 직접 계산하도록 승격할 수 있다.
+
+### 미해결 — OPEN-ISSUE-ENGINE-M4-CHEM-EXCLUSION-UNKNOWN: 화학설비 제외설비 여부 UNKNOWN의 처리
+
+(등록: 2026-10-01, STEP 6-2 UI 설계 검토 중 확인 — 검토자 결정 D-E: 보류,
+별도 Engine 계약 검토)
+
+**성격**: 이것은 UI 입력 계약의 문제가 아니라, **Engine의 M4 화학설비
+제외조건 처리에 관한 계약 검토 사항**이다. 제외설비 여부의 법적 의미
+자체(`DECREE_43_2`, 위 "철회됨" 항목에서 확정)는 이 쟁점의 대상이
+아니다 — 대상은 **그 여부가 입력상 UNKNOWN(`excludedByDecree43_2` 키
+없음)일 때 현재 Engine 계약이 어떻게 처리하는가**이다.
+
+**현재 구현 사실(관찰)**: `evaluateChemicalEquipment_Installation()`은
+`excludedByDecree43_2 === true`일 때만 제외로 취급하고, 그 외(false 또는
+키 없음)에는 `meetsHazardousSubstanceThreshold`만으로 3치 결과를
+산출한다(engine.js의 `const excluded = eq.excludedByDecree43_2 === true`).
+tests.js F3/F4는 이 필드가 명시된 경우(false/true)만 검증하며, 키가 없는
+경우의 계약은 테스트로 고정돼 있지 않다.
+
+**이 문서는 현재 동작이 법적으로 옳다거나 틀리다고 결론짓지 않는다.**
+의도된 계약인지 fail-closed 정합성 관점에서 검토가 필요한 사항인지는
+아래 절차에서 판단한다.
+
+**현재 처리 방침**:
+- UI는 이 질문을 3상태(예/아니오/아직 확인 못 함)로 받아, "모름"을
+  키 생략으로 그대로 전달한다. **UI/Report는 이 문제를 보정하지 않는다.**
+- UI에서 UNKNOWN을 false로 바꾸지 않는다. Report에서 TARGET을 UNKNOWN으로
+  임의로 바꾸지 않는다. 이를 위한 우회 로직을 구현에 넣지 않는다.
+- Engine 0.2.0의 이 동작은 이번 단계에서 변경하지 않는다.
+
+**필요한 다음 조치**: 별도의 Engine 계약 검토·변경 절차로만 해결한다.
+향후 변경 시에는 RULE-CONTRACT → Engine → Snapshot → Report(및 UI) 전체
+계약을 다시 검토·재승인해야 한다. (UI-DESIGN.md §14, REPORT-DESIGN.md
+§11-6 참고.)
 
 ## 11. Report/UI 관련 미착수 사항 (범위 밖, 기록만)
 

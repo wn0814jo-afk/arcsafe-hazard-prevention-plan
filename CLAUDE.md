@@ -115,11 +115,17 @@ STEP 6  구현 (law-basis.js → engine.js → ... )
       명시적 지시 대기).
 - [x] Engine 0.2.0 기준점(commit a0a4ea5)은 origin/main에 push 완료.
       이 파일 정리 커밋 이후의 최신 HEAD는 `git log`로 확인한다.
-- **현재 남은 M4 미해결 쟁점은 2건뿐이다** (세부 내용·처리 방침은
+- **현재 남은 M4 관련 미해결 쟁점은 3건이다** (세부 내용·처리 방침은
   ENGINE-DESIGN.md "미해결 쟁점" 절과 RULE-CONTRACT.md 참조 — 여기에
   법적 판단을 복제하지 않는다):
   - `OPEN-ISSUE-M4-RELOCATION-PARTIAL` (모듈4 이설/일부이전)
   - 화학설비 별표9 물질별 수치 기준표
+  - `OPEN-ISSUE-ENGINE-M4-CHEM-EXCLUSION-UNKNOWN` (M4 화학설비의
+    「산업안전보건법 시행령」 제43조제2항 해당 여부가 입력상 UNKNOWN일 때
+    현재 Engine 계약이 어떻게 처리하는지 — Engine 계약 검토 사항이며
+    현재 상태에 대해 결론을 내리지 않는다. **UI/Report가 UNKNOWN→false
+    또는 TARGET→UNKNOWN으로 보정·우회하는 것을 금지한다.** 해결은 별도의
+    Engine 계약 검토·변경 절차로만 수행한다.)
 
 ## 세션2~4 이력 (STEP 1~4, 참고용)
 
@@ -137,7 +143,7 @@ STEP 6  구현 (law-basis.js → engine.js → ... )
 
 1. STEP 5(Engine 설계·구현)는 **완료**됐고 origin/main에 push됐다
    (세션5, 기준점 commit a0a4ea5). ENGINE-DESIGN.md부터 읽고 시작할 것
-   — 특히 "미해결 쟁점" 절(위 "지금 상태"의 남은 2건)을 먼저 확인.
+   — 특히 "미해결 쟁점" 절(위 "지금 상태"의 남은 3건)을 먼저 확인.
 2. 이 대화(또는 사용자 메시지)에서 STEP 6(Report/UI/Regulatory Map)
    착수 지시가 있었는지 먼저 확인 — 명시적 지시 없이 스스로 판단해서
    코드부터 쓰지 말 것.
@@ -146,7 +152,8 @@ STEP 6  구현 (law-basis.js → engine.js → ... )
    로직(예: `if (kw >= 100)`)을 절대 갖지 않는다. law-basis.js/data.js/
    engine.js/tests.js는 원칙적으로 무변경 — 정말 필요하면 먼저 중단하고
    보고(safety-cert-checker와 동일 원칙).
-4. 남은 미해결 쟁점(`OPEN-ISSUE-M4-RELOCATION-PARTIAL`, 별표9 수치표)은
+4. 남은 미해결 쟁점(`OPEN-ISSUE-M4-RELOCATION-PARTIAL`, 별표9 수치표,
+   `OPEN-ISSUE-ENGINE-M4-CHEM-EXCLUSION-UNKNOWN`)은
    UI/Report를 만들면서 임의로 해결하지 말 것 — 해결은 RULE-CONTRACT.md
    재검토·재승인이 먼저다. Snapshot의 UNKNOWN은 NOT_TARGET으로 바꾸지
    않고 그대로 표시하며, 사용자 안내 문구는 STEP 6 설계 단계에서 정한다.

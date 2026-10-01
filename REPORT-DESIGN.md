@@ -58,7 +58,9 @@ Snapshot에 없는 필드는 화면에서 생략한다(Report가 채우지 않�
 
 ### C2. `reason` 사용 범위 / 확인 필요 안내 생성 범위
 
-- `reason`은 "상세" 영역의 원자료로만 표시한다. **파싱하지 않고, 이를 근거로 분기하지 않는다.**
+- 엔진 `reason`은 `ReportModel`에 **원자료로 보존만** 하고 **사용자 결과 화면에는 기본 표시하지 않는다**
+  (개정 2026-10-01, UI 설계 D-C). 사용자 화면은 구조 필드에 대응하는 구조화된 사용자 문구를 쓴다.
+  **파싱하지 않고, 이를 근거로 분기하지 않으며, 제목·판정으로 쓰지 않는다.**
 - `module4.reason`은 TARGET일 때 내부 키가 앞에 붙고 이설일 때 내부 이슈 ID가 들어 있으므로
   제목·요약에 쓰지 않는다.
 - 사용자 안내 문구의 출처는 아래 세 가지로 **한정**한다.
@@ -121,10 +123,11 @@ Snapshot에 없는 필드는 화면에서 생략한다(Report가 채우지 않�
   - `applicability === APPLICABLE` → 대상 / 대상 아님 / 확인 필요.
   - `NOT_APPLICABLE_TO_WORK_TYPE` → `status`를 표시하지 않고 "이번 작업 유형에는 적용되지 않음"만.
   - 증설·이설의 M1은 "독립 제출 사유 아님 · 다른 항목의 전제조건"으로 별도 표기하며, 그 `status`는 전제조건 값으로만 표시.
-  - 카드 구성: 결과 / 핵심 이유(엔진 `reason` — 상세 영역) / 근거 보기.
+  - 카드 구성: 결과 / 구조 필드 기반 사용자 문구 / 근거 보기. 엔진 `reason`은 표시하지 않는다(D-C).
 - **D. M4 상세**: §6.
 - **E. 확인 필요**: §7.
-- **F. 출처**: `snapshotId`, `createdAt`, `engineVersion`, `ruleVersion` (없는 항목은 생략).
+- **F. 출처**: 사용자 화면에는 `createdAt`만(Snapshot에 있을 때만, 없으면 생략). `snapshotId`,
+  `engineVersion`, `ruleVersion` 원문은 사용자 화면에 표시하지 않는다(개정 2026-10-01, UI 설계 D1).
 
 ## 6. M4 표시
 
@@ -132,7 +135,8 @@ Snapshot에 없는 필드는 화면에서 생략한다(Report가 채우지 않�
 - 설치/전체이전, 주요구조부분변경 각각 5개 설비 행. 표시명은 Report의 정적 사전으로 만든다.
   내부 키(`meltingFurnace` 등)·`NOTICE_*` ID를 주 화면에 쓰지 않는다.
 - 주요구조부분변경 경로에는 "기존 대상설비 전제" 주석을 붙인다.
-- 경로에 `reason`이 있으면(설비 목록이 비는 경우) 그 문장을 상세로 표시한다.
+- 경로 수준에서는 `status`에 대응하는 구조화된 문구(대상 / 대상 아님 / 확인 필요)만 표시한다.
+  경로의 엔진 `reason` 문장은 표시하지 않는다(D-C).
 - 채택되지 않은 경로는 "이번 작업 유형에는 적용되지 않는 경로" 한 줄, 상태 표시 없음.
 - **이설**(`unresolvedLegalIssue` 존재): 설비 행 없이 아래 고정 문구 패널만 표시한다.
 
@@ -154,16 +158,22 @@ Snapshot에 없는 필드는 화면에서 생략한다(Report가 채우지 않�
 - 이설은 현재 계약상 M4가 항상 UNKNOWN이므로 `finalStatus`가 NOT_TARGET, `completeness`가 COMPLETE인
   결과가 나올 수 없다. Report는 이를 완화하지 않는다.
 
-## 8. 근거 표시 (3단계)
+## 8. 근거 표시 (2단계, 개정 2026-10-01 — 검토자 승인 D1)
+
+사용자 화면 **허용 목록(allow-list)**: `statute`, `text`, `effectiveDate`, `noticeNo`,
+`reliability`(`PRIMARY` → "1차 자료 대조 확인"), 그리고 Snapshot에 있으면 `createdAt`.
+
+사용자 화면 **금지**: `note`, `openItems`, `ruleContractRef`, `ruleId`, `ruleVersion` 원문.
 
 1. 기본: 카드 하단에 `statute` 한 줄.
-2. 펼침: 등록된 근거 문구(`text`, "조문 원문"이라고 부르지 않음), 시행일, 고시번호,
-   신뢰 등급(`PRIMARY` → "1차 자료 대조 확인"), `note`(표시 방식 미확정 — §11-5).
-   `openItems` 문구는 노출하지 않는다(C4).
-3. 기술 정보(기본 접힘): `ruleId`, `ruleContractRef`, `ruleVersion`. 내부 ID는 이 층에서만.
+2. 펼침: 등록된 근거 문구(`text`, "조문 원문"이라고 부르지 않음), 시행일, 고시번호, 신뢰 등급.
 
-- 조회 실패 시 ID와 "근거 데이터 없음"을 표시(숨기지 않음).
-- Snapshot의 `ruleVersion` ≠ 현재 `RULE_VERSION`이면 안내 배너만 띄우고 렌더링은 계속한다.
+- 개발자용 provenance(`ruleId`, `ruleContractRef`, `note`, `openItems`, `ruleVersion` 등)는
+  `buildReportModel`의 모델에는 보존할 수 있으나 일반 사용자 UI에는 포함하지 않는다.
+  개발자용 진단 패널은 별도 개발자 기능으로 향후 검토한다(이번 범위 밖).
+- 조회 실패 시 "근거 데이터 없음"만 표시(내부 ID 노출 금지).
+- Snapshot의 `ruleVersion` ≠ 현재 `RULE_VERSION`이면 **불일치 여부만** 검사해 사용자용 고정
+  안내 배너를 띄우고 렌더링은 계속한다. 내부 버전 문자열 자체는 표시하지 않는다.
 
 ## 9. 금지 목록 (Report 전체)
 
@@ -191,6 +201,11 @@ Snapshot에 없는 필드는 화면에서 생략한다(Report가 채우지 않�
 - `openItems`가 모델에 원자료 그대로 보존되고(가공 없음), 사용자 화면 출력에는 그 문구와
   개발자용 표현("이 저장소", "LEGAL SOURCE BLOCKED")이 나타나지 않음.
 - 제6조·Pro/Free 관련 문구·분기가 없음.
+- (D-C 개정) 렌더된 사용자 화면에 엔진 `reason` 문자열이 나타나지 않고, 화면 문구가 구조 필드 조회로만
+  결정됨.
+- (D1 개정) 사용자 화면에 `note`, `openItems`, `ruleContractRef`, `ruleId`, `ruleVersion` 원문,
+  `snapshotId`, `engineVersion`이 나타나지 않음. `ruleVersion` 불일치 시 배너만 표시되고 내부 버전
+  문자열은 표시되지 않음. 출처는 `createdAt`만(있을 때).
 - Report 소스가 `engine.js`의 `evaluate`·`data.js`를 import하지 않음(정적 검사).
 
 ## 11. 후속 품질 이슈 (Report 범위 밖 — 기록만)
@@ -204,11 +219,16 @@ Snapshot에 없는 필드는 화면에서 생략한다(Report가 채우지 않�
    노출하지 않고 provenance 데이터로만 보존한다(C4). 사용자용 문구 정비는 `law-basis.js`
    계약 변경(재승인)이 필요한 별도 품질 개선 사안이며 STEP 6-1 범위 밖이다.
 4. **이설**: 현재 계약상 항상 INCOMPLETE. 해소는 `RULE-CONTRACT.md` 재검토 사안.
-5. **`note` 필드 표시 방식 미확정**: `LAW_BASIS`의 `note` 일부에도 내부 ID·개발자용 표현이
+5. **`note` 필드 표시 방식** — 해소(2026-10-01): `openItems`와 동일하게 사용자 화면 미노출로 확정(§8).
+   (아래는 당시 기록): `LAW_BASIS`의 `note` 일부에도 내부 ID·개발자용 표현이
    있다(예: `NOTICE_2_4`의 note에 `OPEN-ISSUE-M4-RELOCATION-PARTIAL`, `NOTICE_2_1_6`의 note에
    `RULE-CONTRACT.md` 언급). §8의 펼침에서 `note`를 그대로 보여주면 §10의 내부 ID 미노출
    게이트와 충돌하므로, `note`의 사용자 화면 표시 방식은 6-2 설계 전에 결정한다
    (그때까지 `openItems`와 동일하게 미노출로 취급하는 안이 일관적).
+6. **OPEN-ISSUE-ENGINE-M4-CHEM-EXCLUSION-UNKNOWN** (D-E, 2026-10-01): 화학설비 설치 경로에서 시행령
+   제43조제2항 제외 여부가 미확인(키 없음)이어도 Engine이 "제외 아님"으로 취급하는 동작. 별도 Engine 계약
+   검토 사안이며 Report는 이를 보정하지 않는다 — **Report에서 TARGET을 UNKNOWN으로 다시 바꾸지 않는다.**
+   상세는 UI-DESIGN.md §14.
 
 ## 12. 이 문서의 승인 반영 내역
 
@@ -218,5 +238,10 @@ Snapshot에 없는 필드는 화면에서 생략한다(Report가 채우지 않�
 - 수정 ④ `openItems` 등록 데이터 그대로 표시 (C4)
 - 확정: 제6조 무언급 (C5) / 이설 고정 문구 (§6) / 헤드라인 4종 (§4) / `reasons`-`equipmentResults` 역할 분리 (C3)
 - 확정: `ruleVersion` 불일치 배너(렌더링 계속), 헤더에 작업 유형만 표시(전체 입력 요약은 6-2).
+- 개정 ⑦(2026-10-01, UI 설계 D-C 승인): 엔진 `reason`은 사용자 화면에 기본 표시하지 않음(§3-C2, §5-C, §6).
+  D-E OPEN-ISSUE를 §11-6에 기록.
+- 개정 ⑥(2026-10-01, UI 설계 D1 승인): §5-F 출처는 `createdAt`만, §8 근거 표시는 2단계(기술 정보 단계 삭제),
+  `note`·`openItems`·`ruleContractRef`·`ruleId`·`ruleVersion` 원문 사용자 화면 금지, 개발자 진단 패널은
+  일반 사용자 UI에서 제외(별도 개발자 기능으로 향후 검토).
 - 수정 ⑤(커밋 전 최종): `openItems`는 provenance로 보존하되 등록 문구를 사용자 화면에 그대로
   노출하지 않음(C4). 사용자용 근거 문구 정비는 `law-basis.js` 별도 사안(§11-3).
