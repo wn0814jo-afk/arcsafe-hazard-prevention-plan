@@ -336,8 +336,39 @@ tests.js F3/F4는 이 필드가 명시된 경우(false/true)만 검증하며, �
 계약을 다시 검토·재승인해야 한다. (UI-DESIGN.md §14, REPORT-DESIGN.md
 §11-6 참고.)
 
-## 11. Report/UI 관련 미착수 사항 (범위 밖, 기록만)
+### 미해결 — OPEN-ISSUE-ENGINE-M2-SAME-MODEL-EXCLUSION-UNKNOWN: 동일 제조사·동일 모델 제외분 UNKNOWN의 처리
 
-- Report/Regulatory Map/UI 구현 — STEP 6 이후
-- Invariant 10("UI가 독자적으로 판정하지 않음")은 UI가 없어 지금은
-  검증 대상이 없다 — UI 구현 시 반드시 게이트로 추가할 것
+(등록: 2026-10-03, STEP 6 구현 검증 중 관찰 — 검토자 결정: 별도 OPEN-ISSUE,
+Engine 계약 검토 대상)
+
+**성격**: 이것은 UI 입력 계약의 문제가 아니라, **Engine의 모듈 2 순증가분
+산정에서 `sameManufacturerSameModelExcludedKw`가 입력상 UNKNOWN(키 없음)일
+때 현재 Engine 계약이 어떻게 처리하는가**에 관한 계약 검토 사항이다.
+
+**현재 구현 사실(관찰)**: `computeModule2NetIncrease()`는 제외분을
+`m2.sameManufacturerSameModelExcludedKw || 0`으로 읽는다(engine.js). 즉 제외분
+입력이 없으면 0으로 취급해 순증가분을 총 증가분 그대로 계산한다. STEP 6
+구현 중 실측: 정격용량 증가분 합계 150kW에서 제외분을 생략하면 모듈 2가
+TARGET, 제외분 80kW를 입력하면 NOT_TARGET이 나왔다.
+
+**이 문서는 현재 동작이 의도된 계약인지, 잘못된 계약인지 결론짓지 않는다.**
+판단은 아래 절차에서 한다.
+
+**현재 처리 방침**:
+- UI는 "아직 확인 못 함" → 키 생략 계약을 유지한다(UI-DESIGN.md §4).
+  **UI/Report는 이 동작을 보정하지 않는다.**
+- UI에서 UNKNOWN을 0으로 바꾸지 않는다. Report에서 TARGET을 UNKNOWN으로
+  임의로 바꾸지 않는다. 우회 로직을 넣지 않는다.
+- Engine 0.2.0의 이 동작은 이번 단계에서 변경하지 않는다.
+
+**필요한 다음 조치**: 별도의 Engine 계약 검토·변경 절차로만 해결한다.
+향후 변경 시에는 RULE-CONTRACT → Engine → Snapshot → Report(및 UI) 전체
+계약을 다시 검토·재승인해야 한다. (OPEN-ISSUE-ENGINE-M4-CHEM-EXCLUSION-UNKNOWN과
+같은 종류의 검토 대상이므로 함께 검토할 수 있다.)
+
+## 11. Report/UI 구현 상태 (갱신 2026-10-03)
+
+- STEP 6 Report/UI 구현 완료(commit 375ce46): `report.js`, `ui-model.js`/`ui-copy.js`/`ui-render.js`/`app.js`,
+  단일 배포 `dist/hazard-prevention-plan.html`. 설계 SSOT는 REPORT-DESIGN.md·UI-DESIGN.md.
+- Invariant 10("UI가 독자적으로 판정하지 않음")은 `tests-ui.js`(정적 검사·계약 테스트)와 `e2e.js`(실제 브라우저)에 게이트로 추가됨.
+- 별도 Regulatory Map 시각화는 미구현(결과 화면의 모듈·경로 카드로 대체).

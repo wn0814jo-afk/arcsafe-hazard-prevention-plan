@@ -230,6 +230,10 @@ Snapshot에 없는 필드는 화면에서 생략한다(Report가 채우지 않�
    검토 사안이며 Report는 이를 보정하지 않는다 — **Report에서 TARGET을 UNKNOWN으로 다시 바꾸지 않는다.**
    상세는 UI-DESIGN.md §14.
 
+7. **OPEN-ISSUE-ENGINE-M2-SAME-MODEL-EXCLUSION-UNKNOWN** (2026-10-03): 모듈 2에서 "동일 제조사·동일 모델 제외분"이
+   UNKNOWN(키 없음)일 때 Engine이 0으로 읽는 동작. 별도 Engine 계약 검토 사안이며 Report는 이를 보정하지 않는다 —
+   **Report에서 TARGET을 UNKNOWN으로 다시 바꾸지 않는다.** 상세는 UI-DESIGN.md §14.
+
 ## 12. 이 문서의 승인 반영 내역
 
 - 수정 ① `three:false` → "해당 없음" 해석 삭제 (C1)

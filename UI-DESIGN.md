@@ -377,3 +377,13 @@ D3(개발자 진단 패널) 6-2 범위 제외, D5(PDF) Build 3 유지.
   - 이번 UI 구현에 우회 로직을 넣지 않는다.
 - **처리 절차**: 별도 Engine 계약 변경 절차(RULE-CONTRACT 재검토·재승인 → Engine 수정 → 테스트)로만 해결한다.
   해결 전까지 이 이슈는 열린 상태로 유지한다.
+
+**OPEN-ISSUE-ENGINE-M2-SAME-MODEL-EXCLUSION-UNKNOWN** (등록: 2026-10-03)
+
+- **현상(Engine 0.2.0, 관찰)**: 모듈 2에서 `sameManufacturerSameModelExcludedKw`가 생략(UNKNOWN)이면 Engine은
+  이를 0으로 읽는다(`|| 0`). 증설 STEP 5의 "동일 제조사·동일 모델 제외분 — 아직 확인 못 함"이 이 경로에 해당한다.
+- **쟁점**: 의도된 계약인지, 검토가 필요한 사항인지는 Engine 계약 검토에서 판단한다. **이 문서는 현재 상태에 대해
+  결론을 내리지 않는다.** UI 입력 계약의 문제가 아니라 Engine의 입력 처리 계약 검토 사항이다
+  (ENGINE-DESIGN.md §10 참고).
+- **UI/Report 처리 방침**: "아직 확인 못 함" → 키 생략을 유지하고, UI에서 UNKNOWN을 0으로 바꾸거나 Report에서
+  TARGET을 UNKNOWN으로 바꾸는 보정·우회를 하지 않는다. 해결은 별도 Engine 계약 변경 절차로만 한다.

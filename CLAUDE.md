@@ -111,11 +111,15 @@ STEP 6  구현 (law-basis.js → engine.js → ... )
       UNKNOWN(OPEN-ISSUE-M4-RELOCATION-PARTIAL)이다.** 세부 법적
       판정근거·경계값·미해결 쟁점은 전부 RULE-CONTRACT.md/
       ENGINE-DESIGN.md를 따른다.
-- [ ] **UI/Regulatory Map/Report는 아직 구현 안 함**(STEP 6 이후, 검토자
-      명시적 지시 대기).
+- [x] **STEP 6 Report/UI 구현 완료(2026-10-03, commit 375ce46)** —
+      `report.js`, `ui-model.js`/`ui-copy.js`/`ui-render.js`/`app.js`,
+      단일 배포 `dist/hazard-prevention-plan.html`, `tests-ui.js`(49),
+      `e2e.js`(Playwright 13개 여정). 설계 SSOT: REPORT-DESIGN.md,
+      UI-DESIGN.md. 별도 Regulatory Map 시각화는 미구현. 배포 절차는
+      DEPLOY.md(Cloudflare Workers Static Assets).
 - [x] Engine 0.2.0 기준점(commit a0a4ea5)은 origin/main에 push 완료.
       이 파일 정리 커밋 이후의 최신 HEAD는 `git log`로 확인한다.
-- **현재 남은 M4 관련 미해결 쟁점은 3건이다** (세부 내용·처리 방침은
+- **현재 남은 미해결 쟁점은 4건이다** (세부 내용·처리 방침은
   ENGINE-DESIGN.md "미해결 쟁점" 절과 RULE-CONTRACT.md 참조 — 여기에
   법적 판단을 복제하지 않는다):
   - `OPEN-ISSUE-M4-RELOCATION-PARTIAL` (모듈4 이설/일부이전)
@@ -126,6 +130,11 @@ STEP 6  구현 (law-basis.js → engine.js → ... )
     현재 상태에 대해 결론을 내리지 않는다. **UI/Report가 UNKNOWN→false
     또는 TARGET→UNKNOWN으로 보정·우회하는 것을 금지한다.** 해결은 별도의
     Engine 계약 검토·변경 절차로만 수행한다.)
+  - `OPEN-ISSUE-ENGINE-M2-SAME-MODEL-EXCLUSION-UNKNOWN` (모듈 2에서
+    "동일 제조사·동일 모델 제외분"이 입력상 UNKNOWN일 때 현재 Engine
+    계약이 어떻게 처리하는지 — Engine 계약 검토 사항이며 현재 상태에 대해
+    결론을 내리지 않는다. UI/Report의 보정·우회 금지, 해결은 별도 Engine
+    계약 검토·변경 절차로만 수행한다.)
 
 ## 세션2~4 이력 (STEP 1~4, 참고용)
 
@@ -143,9 +152,10 @@ STEP 6  구현 (law-basis.js → engine.js → ... )
 
 1. STEP 5(Engine 설계·구현)는 **완료**됐고 origin/main에 push됐다
    (세션5, 기준점 commit a0a4ea5). ENGINE-DESIGN.md부터 읽고 시작할 것
-   — 특히 "미해결 쟁점" 절(위 "지금 상태"의 남은 3건)을 먼저 확인.
-2. 이 대화(또는 사용자 메시지)에서 STEP 6(Report/UI/Regulatory Map)
-   착수 지시가 있었는지 먼저 확인 — 명시적 지시 없이 스스로 판단해서
+   — 특히 "미해결 쟁점" 절(위 "지금 상태"의 남은 4건)을 먼저 확인.
+2. STEP 6 Report/UI 구현은 완료됐다(375ce46). 이후 작업(Cloudflare 배포
+   확인, Regulatory Map, Engine OPEN-ISSUE 검토 등)은 사용자 메시지의
+   명시적 지시가 있는지 먼저 확인 — 명시적 지시 없이 스스로 판단해서
    코드부터 쓰지 말 것.
 3. STEP 6 착수 시 필수 원칙(ENGINE-DESIGN.md 그대로): Report/UI는
    `evaluate()`가 반환한 Snapshot을 그대로 시각화만 하고, 자체 판정
@@ -153,7 +163,8 @@ STEP 6  구현 (law-basis.js → engine.js → ... )
    engine.js/tests.js는 원칙적으로 무변경 — 정말 필요하면 먼저 중단하고
    보고(safety-cert-checker와 동일 원칙).
 4. 남은 미해결 쟁점(`OPEN-ISSUE-M4-RELOCATION-PARTIAL`, 별표9 수치표,
-   `OPEN-ISSUE-ENGINE-M4-CHEM-EXCLUSION-UNKNOWN`)은
+   `OPEN-ISSUE-ENGINE-M4-CHEM-EXCLUSION-UNKNOWN`,
+   `OPEN-ISSUE-ENGINE-M2-SAME-MODEL-EXCLUSION-UNKNOWN`)은
    UI/Report를 만들면서 임의로 해결하지 말 것 — 해결은 RULE-CONTRACT.md
    재검토·재승인이 먼저다. Snapshot의 UNKNOWN은 NOT_TARGET으로 바꾸지
    않고 그대로 표시하며, 사용자 안내 문구는 STEP 6 설계 단계에서 정한다.
