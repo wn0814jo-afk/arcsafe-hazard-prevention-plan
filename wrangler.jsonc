@@ -1,0 +1,9 @@
+{
+  // Cloudflare Workers (Static Assets) — dist/hazard-prevention-plan.html 한 파일을 index.html로 제공한다.
+  // 코드(Worker 스크립트) 없음: assets 전용 배포. 인증/과금/서버 로직 없음.
+  "name": "arcsafe-hazard-prevention-plan",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./public"
+  }
+}
