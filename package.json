@@ -5,7 +5,9 @@
   "description": "유해위험방지계획서 제출대상 판별 Engine (STEP 5 — Engine 설계/구현)",
   "main": "engine.js",
   "scripts": {
-    "test": "node tests.js"
+    "test": "node tests.js && node tests-ui.js",
+    "build": "node build.js",
+    "test:e2e": "node build.js && node e2e.js"
   },
   "license": "UNLICENSED"
 }

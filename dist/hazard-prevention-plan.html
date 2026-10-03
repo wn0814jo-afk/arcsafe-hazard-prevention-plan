@@ -1,0 +1,2445 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>유해·위험방지계획서 제출 대상 확인</title>
+<style>
+:root{
+  --bg:#f6f7f9;--card:#fff;--text:#1b1f24;--muted:#4b5563;--line:#cfd5dd;
+  --primary:#0b57d0;--primary-text:#fff;
+  --target-bg:#fdecec;--target-line:#b42318;--target-text:#7a1810;
+  --unknown-bg:#fff4d6;--unknown-line:#a15c00;--unknown-text:#5c3500;
+  --neutral-bg:#eef1f5;--neutral-line:#6b7280;--neutral-text:#1f2933;
+  --focus:#0b57d0;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif}
+#app{max-width:640px;margin:0 auto;padding:16px 16px 96px}
+h1{font-size:1.5rem;line-height:1.35;margin:8px 0 12px}
+h2{font-size:1.25rem;line-height:1.4;margin:4px 0 12px}
+h3{font-size:1.05rem;margin:0 0 8px}
+h4{font-size:1rem;margin:0 0 6px}
+h5{font-size:.95rem;margin:8px 0 4px}
+h1:focus,h2:focus,#errsum:focus{outline:none}
+h1:focus-visible,h2:focus-visible,#errsum:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+p{margin:0 0 10px}
+.lead{font-weight:600}
+.muted{color:var(--muted);font-size:.95rem}
+.scope{color:var(--muted);font-size:.9rem;border-top:1px solid var(--line);padding-top:10px;margin-top:20px}
+.stepno{color:var(--muted);font-size:.9rem;margin:0}
+.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+fieldset.group{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:12px 14px;margin:0 0 14px}
+fieldset.group legend{font-weight:700;padding:0 6px}
+.opt{display:flex;align-items:center;gap:10px;min-height:44px;padding:6px 4px;cursor:pointer}
+.opt input{width:22px;height:22px;flex:none;accent-color:var(--primary)}
+.sep{border:0;border-top:1px dashed var(--line);margin:8px 0}
+.field{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:0 0 14px}
+.field .q{display:block;font-weight:700;margin-bottom:8px}
+.row{display:flex;align-items:center;gap:8px}
+input[type=text],select{width:100%;min-height:44px;font:inherit;padding:8px 10px;border:1px solid #6b7280;border-radius:8px;background:#fff;color:var(--text)}
+input[type=text]:disabled,select:disabled{background:#eceff3;color:#6b7280}
+.unit{white-space:nowrap;color:var(--muted)}
+.sub{margin:0 0 6px 36px}
+.has-error{border-color:var(--target-line)!important;border-width:2px}
+.err{color:var(--target-text);font-weight:600;margin:6px 0 0}
+.errsum{background:var(--target-bg);border:2px solid var(--target-line);color:var(--target-text);border-radius:10px;padding:10px 14px;margin:0 0 14px}
+.errsum ul{margin:6px 0 0;padding-left:20px}
+.errsum a{color:var(--target-text);text-decoration:underline;min-height:44px;display:inline-block}
+.subsec{margin:0 0 6px}
+.nav{position:sticky;bottom:0;display:flex;justify-content:space-between;gap:12px;background:linear-gradient(to top,var(--bg) 75%,rgba(246,247,249,0));padding:16px 0 12px;margin-top:12px}
+.btn{min-height:48px;min-width:96px;padding:10px 18px;font:inherit;font-weight:700;border-radius:10px;border:2px solid var(--primary);background:#fff;color:var(--primary);cursor:pointer}
+.btn.primary{background:var(--primary);color:var(--primary-text)}
+.btn:focus-visible,.link:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.link{background:none;border:0;color:var(--primary);text-decoration:underline;font:inherit;min-height:44px;padding:0 6px;cursor:pointer}
+.headline{display:flex;gap:12px;align-items:flex-start;border:2px solid;border-radius:12px;padding:14px 16px;margin:6px 0 14px}
+.headline .ico{font-size:1.4rem;line-height:1.3}
+.headline h2{margin:0}
+.headline .sub{margin:6px 0 0;font-weight:700}
+.tone-target{background:var(--target-bg);border-color:var(--target-line);color:var(--target-text)}
+.tone-unknown{background:var(--unknown-bg);border-color:var(--unknown-line);color:var(--unknown-text)}
+.tone-neutral,.tone-nontarget,.tone-error{background:var(--neutral-bg);border-color:var(--neutral-line);color:var(--neutral-text)}
+.block{margin:0 0 18px}
+.block.tone-unknown{border:2px solid var(--unknown-line);border-radius:10px;padding:12px 14px}
+.confirm{margin:0;padding-left:20px}
+.confirm li{margin-bottom:4px}
+.card{border:1px solid;border-left-width:6px;border-radius:10px;padding:10px 14px;margin:0 0 10px}
+.callout{border:2px solid;border-radius:10px;padding:10px 14px;margin:8px 0 12px}
+.callout p:last-child{margin-bottom:0}
+.badge{display:inline-block;white-space:nowrap;flex:none;font-weight:700;padding:2px 10px;border-radius:999px;border:1px solid;font-size:.95rem}
+.badge.tone-target{background:var(--target-bg)}
+.rows{list-style:none;margin:6px 0;padding:0}
+.rows li{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.path{margin:8px 0}
+.basis{margin-top:8px}
+.basis summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:700;color:var(--primary)}
+.basis ul{padding-left:18px;margin:6px 0}
+.basis li{margin-bottom:8px}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+(function () {
+var defs = {
+'./data.js': function (module, exports, require) {
+/**
+ * data.js
+ *
+ * law-basis.js의 조문 원문에 이미 적힌 숫자만 상수로 뽑아둔 것.
+ * 여기 숫자를 바꾸는 것도 law-basis.js와 마찬가지로 법적 판정
+ * 계약 변경이다 — RULE-CONTRACT.md 재검토 없이 바꾸지 않는다.
+ */
+'use strict';
+
+const THRESHOLDS = Object.freeze({
+  // 모듈 1·2·3 공통 전제조건(DECREE_42_1)
+  CONTRACT_CAPACITY_KW: 300,
+
+  // 모듈 2 (NOTICE_2_1_5_GA)
+  MODULE2_RATED_CAPACITY_INCREASE_KW: 100,
+
+  // 모듈 3 (NOTICE_2_1_5_NA)
+  MODULE3_RELOCATED_RATED_CAPACITY_KW: 100,
+
+  // 모듈 4 - 1. 용해로 (NOTICE_3)
+  EQUIPMENT_MELTING_FURNACE_TON: 3,
+
+  // 모듈 4 - 3. 건조설비 (NOTICE_3)
+  EQUIPMENT_DRYING_FUEL_KG_PER_HOUR: 50,
+  EQUIPMENT_DRYING_RATED_POWER_KW: 50,
+
+  // 모듈 4 - 4. 가스집합 용접장치 (NOTICE_3)
+  EQUIPMENT_GAS_WELDING_ASSEMBLY_KG: 1000,
+
+  // 모듈 4 - 5. 유해물질 밀폐·환기·배기설비 (NOTICE_3)
+  EQUIPMENT_VENTILATION_NOTICE_TABLE1_ITEM7_M3_PER_MIN: 60,
+  EQUIPMENT_VENTILATION_PERMIT_OR_MANAGED_OR_DUST_M3_PER_MIN: 150,
+});
+
+// 모듈 4 - 3. 건조설비의 "다음 중 하나" 목적 분류
+// (RULE-CONTRACT.md ## 판정 모듈 4 표 3행)
+const DRYING_PURPOSE = Object.freeze({
+  ORGANIC_COMPOUND: 'ORGANIC_COMPOUND', // 가) 유기화합물 건조
+  COATING_FLAMMABLE_VAPOR: 'COATING_FLAMMABLE_VAPOR', // 나) 도료·피막제 도포코팅 표면건조로 인화성증기 발생
+  COMBUSTIBLE_DUST: 'COMBUSTIBLE_DUST', // 다) 가연성분말 분진 발생
+});
+
+// 모듈 4 - 5. 유해물질 밀폐·환기·배기설비의 물질 구분
+// (배풍량 기준이 물질 구분에 따라 60 또는 150으로 갈림)
+const VENTILATION_SUBSTANCE_CATEGORY = Object.freeze({
+  NOTICE_TABLE1_ITEM7: 'NOTICE_TABLE1_ITEM7', // 안전검사절차고시 별표1 제7호 유해물질 → 60㎥/분
+  PERMIT_OR_MANAGED_OR_DUST_TABLE16: 'PERMIT_OR_MANAGED_OR_DUST_TABLE16', // 허가/관리대상물질 또는 별표16 분진작업 → 150㎥/분
+});
+
+const WORK_TYPE = Object.freeze({
+  NEW: 'NEW', // 신설
+  FULL_RELOCATION: 'FULL_RELOCATION', // 전체이전
+  MODIFICATION: 'MODIFICATION', // 증설·교체·개조
+  PARTIAL_RELOCATION: 'PARTIAL_RELOCATION', // 일부 설비 이전(이설)
+});
+
+module.exports = { THRESHOLDS, DRYING_PURPOSE, VENTILATION_SUBSTANCE_CATEGORY, WORK_TYPE };
+
+},
+'./law-basis.js': function (module, exports, require) {
+/**
+ * law-basis.js
+ *
+ * 이 파일은 RULE-CONTRACT.md(승인됨: 2026-09-25, commit 3b49e91)에
+ * 적힌 조문을 그대로 옮긴 것이다. 요약하거나 재구성하지 않는다.
+ *
+ * 이 파일을 고치는 것은 "코드 버그 수정"이 아니라 "법적 판정 계약
+ * 변경"이다. 이 파일의 내용을 바꾸려면 먼저 RULE-CONTRACT.md를
+ * 다시 검토·승인받아야 한다 — engine.js에서 이 파일의 값을 편의상
+ * 바꾸지 않는다.
+ *
+ * 각 항목은 Object.freeze로 잠가 런타임 변조를 막는다
+ * (safety-cert-checker의 reg() 패턴과 동일 — 그 프로젝트에서
+ * basis 레지스트리가 freeze 안 돼 변조 가능했던 버그가 실제로
+ * 있었음, 재발 방지).
+ */
+'use strict';
+
+function basis(entry) {
+  return Object.freeze({ ...entry });
+}
+
+const RULE_VERSION = 'RULE-CONTRACT@M4-reapproved-2026-09-26(commit-2feffff)';
+
+const LAW_BASIS = Object.freeze({
+  // 모듈 1의 근거이자, 모듈 2·3의 공통 전제조건("영 제42조제1항에
+  // 해당하는 업종의 사업장")의 근거이기도 하다.
+  DECREE_42_1: basis({
+    ruleId: 'DECREE_42_1',
+    statute: '산업안전보건법 시행령 제42조제1항',
+    effectiveDate: '2026-08-01',
+    text:
+      '대통령령으로 정하는 사업의 종류 및 규모에 해당하는 사업장의 사업주는 ' +
+      '유해위험방지계획서를 제출하여야 한다 — 13개 대상 업종 + 전기 계약용량 300kW 이상',
+    reliability: 'PRIMARY', // 🟢 law.go.kr 원문 확인
+    ruleContractRef: 'RULE-CONTRACT.md ## 판정 모듈 1',
+  }),
+
+  DECREE_42_2: basis({
+    ruleId: 'DECREE_42_2',
+    statute: '산업안전보건법 시행령 제42조제2항',
+    effectiveDate: '2026-08-01',
+    text: '유해하거나 위험한 작업 및 장소에서 사용하는 기계·기구 및 설비 — 5종 대상설비',
+    reliability: 'PRIMARY', // 🟢 law.go.kr 원문 확인
+    ruleContractRef: 'RULE-CONTRACT.md ## 판정 모듈 4',
+  }),
+
+  NOTICE_2_1_5_GA: basis({
+    ruleId: 'NOTICE_2_1_5_GA',
+    statute:
+      '제조업 등 유해·위험방지계획서 제출·심사·확인에 관한 고시 제2조제1항제5호 가목',
+    noticeNo: '고용노동부고시 제2023-50호',
+    effectiveDate: '2023-10-12',
+    text:
+      '"제품생산 공정과 관련되는 건설물·기계·기구 및 설비 등"의 증설, 교체 또는 개조 등에 ' +
+      '의해 전기정격용량의 합이 100킬로와트 이상 증가되는 경우. 다만, 전기정격용량의 합을 ' +
+      '산정할 때, 단위공장 내 심사 완료된 설비와 같은 제조사의 같은 모델은 제외한다.',
+    reliability: 'PRIMARY', // 🟢 국가법령정보센터 신구조문대비표로 확정 대조
+    note: '단서("다만...")는 고시 제2023-50호(2023.10.6 개정)로 신설됨 — 2022-13호까지는 없었음',
+    ruleContractRef: 'RULE-CONTRACT.md ## 판정 모듈 2',
+  }),
+
+  NOTICE_2_1_5_NA: basis({
+    ruleId: 'NOTICE_2_1_5_NA',
+    statute:
+      '제조업 등 유해·위험방지계획서 제출·심사·확인에 관한 고시 제2조제1항제5호 나목',
+    noticeNo: '고용노동부고시 제2023-50호',
+    effectiveDate: '2023-10-12',
+    text:
+      '전기정격용량의 합이 100킬로와트 이상되는 규모의 "제품생산 공정과 관련되는 ' +
+      '건설물·기계·기구 및 설비 등"의 일부를 옮겨서 설치하는 경우.',
+    reliability: 'PRIMARY', // 🟢 신구조문대비표: "나. (현행과 같음)"
+    note:
+      '가목의 "동일 제조사·동일 모델 제외" 계산방법 예외는 나목에는 적용되지 않는다 ' +
+      '(신구조문대비표에서 확정). 가목·나목 공통으로 "영 제42조제1항에 해당하는 업종의 ' +
+      '사업장"이라는 전제조건이 걸린다(신구조문대비표 "5." 항목 도입부) — 이 전제조건은 ' +
+      'DECREE_42_1과 동일한 사업장 정의다.',
+    ruleContractRef: 'RULE-CONTRACT.md ## 판정 모듈 3',
+  }),
+
+  NOTICE_3: basis({
+    ruleId: 'NOTICE_3',
+    statute: '제조업 등 유해·위험방지계획서 제출·심사·확인에 관한 고시 제3조',
+    effectiveDate: '2023-10-12',
+    text:
+      '5종 대상설비의 판정 기준 — ' +
+      '1) 용해로: 금속/비금속광물을 녹는점 이상으로 가열 용해, 용량 3톤 이상. ' +
+      '2) 화학설비: 안전보건규칙 제273조 "특수화학설비", 하루 제조/취급량(단위공정 저장량 ' +
+      '포함)이 안전보건규칙 별표9 위험물질 기준량 이상(단, 시행령 제43조제2항이 정한 설비는 ' +
+      '제외). ' +
+      '3) 건조설비: 건조기본체+가열장치+환기장치, (연료 최대소비량 시간당 50kg 이상 또는 ' +
+      '정격소비전력 50kW 이상) 그리고 (유기화합물 건조 또는 도료·피막제 도포코팅 표면건조로 ' +
+      '인화성증기 발생 또는 건조로 가연성분말 분진 발생) 중 하나. ' +
+      '4) 가스집합 용접장치: 용접·용단용 인화성가스 집합량 1,000kg 이상, 저장용기/탱크를 ' +
+      '도관으로 연결한 고정식. ' +
+      '5) 유해물질 밀폐·환기·배기설비: 안전보건규칙 제422~608조 관련 국소배기장치(이동식 ' +
+      '제외)/밀폐설비/전체환기설비 — 안전검사절차고시 별표1 제7호 유해물질은 배풍량 ' +
+      '60㎥/분 이상, 그 외 허가/관리대상물질 또는 별표16 분진작업은 배풍량 150㎥/분 이상.',
+    reliability: 'PRIMARY', // 🟢 moel.go.kr 공식 FAQ 원문 확인 + U-LEX/law.go.kr 고시 제3조 원문 대조(세션5)
+    openItems: [
+      // 세션5 정정: 화학설비 제외조항(시행령 제43조제2항) 자체는 확정됨(DECREE_43_2 참고).
+      // 남은 미해결은 별표9 물질별 기준량 수치표뿐이다.
+      'EQUIPMENT_CHEMICAL_HAZARDOUS_SUBSTANCE_THRESHOLD_TABLE(안전보건규칙 별표9)의 ' +
+        '물질별 기준량 수치는 RULE-CONTRACT.md에 인용되지 않았다 — LEGAL SOURCE BLOCKED, ' +
+        'engine은 meetsHazardousSubstanceThreshold(boolean)를 입력으로 받는다.',
+    ],
+    ruleContractRef: 'RULE-CONTRACT.md ## 판정 모듈 4',
+  }),
+
+  // 세션5 정정: 이전 세션에서 "시행령 제43조제2항은 PSM(공정안전보고서) 조문이므로
+  // 혼입 오류"라고 판단했던 것은 틀렸다 — 고시 제3조제2호 원문이 이 조문을
+  // 명시적으로 인용한다(U-LEX/law.go.kr 고시 원문 재대조로 확정). 시행령 제43조가
+  // "공정안전보고서의 제출 대상"이라는 제목을 가진 것과, 유해위험방지계획서 고시가
+  // 그 제2항(제외설비 목록)만 준용하는 것은 모순이 아니다 — 법령은 원래 다른
+  // 조문을 인용/준용하는 경우가 흔하다.
+  DECREE_43_2: basis({
+    ruleId: 'DECREE_43_2',
+    statute: '산업안전보건법 시행령 제43조제2항',
+    text:
+      '제1항에도 불구하고 다음 각 호의 설비는 유해하거나 위험한 설비로 보지 않는다: ' +
+      '1) 원자력 설비, 2) 군사시설, 3) 사업주가 해당 사업장 내에서 직접 사용하기 위한 ' +
+      '난방용 연료의 저장설비 및 사용설비, 4) 도매·소매시설, 5) 차량 등의 운송설비, ' +
+      '6) 「액화석유가스의 안전관리 및 사업법」에 따른 액화석유가스의 충전·저장시설, ' +
+      '7) 「도시가스사업법」에 따른 가스공급시설, 8) 그 밖에 고용노동부장관이 누출·화재·' +
+      '폭발 등의 사고가 있더라도 그에 따른 피해의 정도가 크지 않다고 인정하여 고시하는 설비.',
+    reliability: 'PRIMARY', // 🟢 law.go.kr 원문(세션5 확보)
+    note:
+      '이 조문 자체는 시행령 제43조("공정안전보고서의 제출 대상")의 일부이지만, ' +
+      '고시 제3조제2호(NOTICE_3)가 화학설비 정의에서 "단, 영 제43조제2항에서 정한 ' +
+      '설비는 제외"라고 명시적으로 인용하므로 이 저장소의 화학설비(모듈4) 판정에도 ' +
+      '유효한 근거다 — PSM 혼입이 아니다(세션5에서 재확인, 이전 세션의 "혼입 오류" ' +
+      '판단은 폐기됨).',
+    ruleContractRef: 'RULE-CONTRACT.md ## 판정 모듈 4 (M4-설치/이전 표)',
+  }),
+
+  // 고시 제2조제4호 — "이전"의 정의. 법 제42조제1항 제1호·제2호 공통 정의이며,
+  // 모듈1(전체이전)과 모듈4(설치/이전 경로)에 공통 적용된다.
+  NOTICE_2_4: basis({
+    ruleId: 'NOTICE_2_4',
+    statute: '제조업 등 유해·위험방지계획서 제출·심사·확인에 관한 고시 제2조제4호',
+    text:
+      '법 제42조제1항 제1호 및 제2호에서 "이전"이란 건설물·기계·기구 및 설비 등 ' +
+      '일체를 다른 단위공장 또는 다른 지역으로 옮겨서 설치하는 것을 말한다.',
+    reliability: 'PRIMARY', // 🟢 U-LEX/law.go.kr 원문(세션5 확보)
+    note:
+      '"일체"를 옮기는 것(전체이전)만 이 정의에 해당한다. "일부"를 옮기는 것은 ' +
+      '모듈1·4에는 대응 정의가 없다 — 모듈3(이설)의 "일부 이설" 정의(NOTICE_2_1_5_NA)는 ' +
+      '법 제42조제1항제1호 전용이며 모듈4에 임의로 확장하지 않는다 ' +
+      '(OPEN-ISSUE-M4-RELOCATION-PARTIAL, RULE-CONTRACT.md 참고).',
+    ruleContractRef: 'RULE-CONTRACT.md ## 판정 모듈 4 (OPEN-ISSUE-M4-RELOCATION-PARTIAL)',
+  }),
+
+  // 고시 제2조제1항제6호 가~마목 — "주요구조부분 변경" 트리거.
+  // 세션5에서 법 제42조제1항제2호 원문("설치·이전하거나 그 주요 구조부분을
+  // 변경하려는 경우")을 확보해 결합 방식을 확정했다: NOTICE_3(설치/이전 기준)과
+  // NOTICE_2_1_6(변경 기준)은 작업형태별로 배타적으로 적용되는 별도 경로다.
+  // engine.js가 이제 이 조문을 사용한다(M4-CHANGE 경로).
+  NOTICE_2_1_6: basis({
+    ruleId: 'NOTICE_2_1_6',
+    statute:
+      '제조업 등 유해·위험방지계획서 제출·심사·확인에 관한 고시 제2조제1항제6호 가~마목',
+    noticeNo: '고용노동부고시 제2023-50호(가~마 조문 자체는 개정 없음)',
+    effectiveDate: '2023-10-12',
+    text:
+      '법 제42조제1항제2호에 따른 "주요 구조부분을 변경"이란 영 제42조제2항의 유해 ' +
+      '또는 위험한 작업 및 장소에서 사용하는 기계·기구 및 설비 중 다음 각 목과 같은 ' +
+      '사항을 변경하는 경우를 말한다. ' +
+      '가) 용해로: 열원의 종류를 변경하는 경우. ' +
+      '나) 화학설비: 생산량 증가·원료 또는 제품 변경을 위한 대상 화학설비의 교체·변경·추가, ' +
+      '또는 관리대상 유해물질 관련 설비의 추가·변경으로 후드 제어풍속 감소 또는 배풍기 ' +
+      '배풍량 증가. ' +
+      '다) 건조설비: 열원의 종류 변경, 또는 건조대상물 변경으로 제3조제3호 각목 중 하나에 ' +
+      '재해당. ' +
+      '라) 가스집합용접장치: 주관의 구조를 변경하는 경우. ' +
+      '마) 허가대상 유해물질 및 분진작업 관련설비: 추가/변경으로 후드제어풍속 감소 또는 ' +
+      '배풍기 배풍량 증가.',
+    reliability: 'PRIMARY', // 🟢 신구조문대비표: 전부 "현행과 같음"
+    note:
+      '도입부의 "~설비 중"이라는 문구가 모든 목에 공통되는 전제("이미 영 제42조제2항 ' +
+      '대상설비여야 한다")다. 다목(건조설비)만 "제3조제3호 각목"을 명시적으로 재인용 ' +
+      '(목적분류만 재사용, 50kg/h·50kW 크기기준은 재적용하지 않음) — 나머지 가·나·라·마 ' +
+      '목은 제3조의 수치기준을 변경경로에서 다시 계산하지 않는다(RULE-CONTRACT.md ' +
+      '"M4-주요구조부분변경" 절 참고).',
+    ruleContractRef: 'RULE-CONTRACT.md ## 판정 모듈 4 (M4-주요구조부분변경)',
+  }),
+
+  PSM_2_1_1_NOT_APPLICABLE: basis({
+    ruleId: 'PSM_2_1_1_NOT_APPLICABLE',
+    statute: '공정안전보고서의 제출·심사·확인 및 이행상태평가 등에 관한 규정 제2조제1항제1호',
+    text:
+      '"생산설비 및 부대설비의 전기정격용량 총합이 300kW 이상" — PSM(공정안전보고서) ' +
+      '재제출 기준이며, 이 프로젝트(유해위험방지계획서)와는 완전히 별도 SSOT다. ' +
+      '이 저장소의 어떤 모듈 판정에도 이 조문의 300kW 수치를 사용하지 않는다.',
+    reliability: 'PRIMARY', // 🟢 moel.go.kr 공식 FAQ 원문 확인
+    ruleContractRef: 'RULE-CONTRACT.md ## 판정 모듈 2 "혼동 방지"',
+  }),
+});
+
+const INDUSTRY_LIST = Object.freeze([
+  '금속가공제품 제조업(기계 및 가구 제외)',
+  '비금속 광물제품 제조업',
+  '기타 기계 및 장비 제조업',
+  '자동차 및 트레일러 제조업',
+  '식료품 제조업',
+  '고무제품 및 플라스틱제품 제조업',
+  '목재 및 나무제품 제조업',
+  '기타 제품 제조업',
+  '1차 금속 제조업',
+  '가구 제조업',
+  '화학물질 및 화학제품 제조업',
+  '반도체 제조업',
+  '전자부품 제조업',
+]);
+
+module.exports = { LAW_BASIS, INDUSTRY_LIST, RULE_VERSION };
+
+},
+'./engine.js': function (module, exports, require) {
+/**
+ * engine.js
+ *
+ * RULE-CONTRACT.md(승인됨: 2026-09-25)를 코드로 옮긴 Pure Engine.
+ *
+ * 반드시 지키는 것 (RULE-CONTRACT.md / STEP 5 지시 그대로):
+ *  - DOM을 읽거나 쓰지 않는다.
+ *  - localStorage/네트워크를 쓰지 않는다.
+ *  - 현재 시간에 의존하지 않는다 — evaluate()가 만드는 snapshot에
+ *    시각 정보가 필요하면 호출자가 meta.now로 명시적으로 넘긴다.
+ *  - 전역 mutable state가 없다. 이전 실행 결과를 내부에 저장하지 않는다.
+ *  - 동일 input이면 항상 동일 snapshot (determinism).
+ *
+ * 상태 3분류 (RULE-CONTRACT.md "결과 상태" 절):
+ *   TARGET / NOT_TARGET / UNKNOWN
+ * 적용범위 2분류 (같은 절 + "N/A vs NOT_TARGET" 절):
+ *   APPLICABLE / NOT_APPLICABLE_TO_WORK_TYPE
+ * 이 둘은 절대 하나의 boolean으로 축약하지 않는다 (Invariant 3, 6).
+ */
+'use strict';
+
+const { LAW_BASIS, INDUSTRY_LIST, RULE_VERSION } = require('./law-basis.js');
+const { THRESHOLDS, WORK_TYPE } = require('./data.js');
+
+const ENGINE_VERSION = '0.2.0';
+
+const STATUS = Object.freeze({
+  TARGET: 'TARGET',
+  NOT_TARGET: 'NOT_TARGET',
+  UNKNOWN: 'UNKNOWN',
+});
+
+const APPLICABILITY = Object.freeze({
+  APPLICABLE: 'APPLICABLE',
+  NOT_APPLICABLE_TO_WORK_TYPE: 'NOT_APPLICABLE_TO_WORK_TYPE',
+});
+
+// ---------------------------------------------------------------------------
+// 3치 논리 (three-valued logic) 헬퍼
+//
+// 조건 하나하나는 true(충족) | false(불충족) | undefined(모름)로 표현한다.
+// AND: 하나라도 false면 전체 false(다른 조건이 unknown이어도 확정 가능).
+//      전부 true면 true. 그 외(false는 없고 unknown이 하나라도 있음)는 unknown.
+// OR:  하나라도 true면 전체 true. 전부 false면 false. 그 외는 unknown.
+// 이 논리가 UNKNOWN이 NOT_TARGET으로 조기 확정되지 않게 하는 핵심 장치다
+// (RULE-CONTRACT.md "절대 규칙(fail-closed)").
+// ---------------------------------------------------------------------------
+
+function and3(...conditions) {
+  if (conditions.some((c) => c === false)) return false;
+  if (conditions.every((c) => c === true)) return true;
+  return undefined;
+}
+
+function or3(...conditions) {
+  if (conditions.some((c) => c === true)) return true;
+  if (conditions.every((c) => c === false)) return false;
+  return undefined;
+}
+
+function toStatus(threeValued) {
+  if (threeValued === true) return STATUS.TARGET;
+  if (threeValued === false) return STATUS.NOT_TARGET;
+  return STATUS.UNKNOWN;
+}
+
+// 숫자 비교를 3치 논리로: 값이 없으면 unknown, 있으면 실제 비교.
+function gte(value, threshold) {
+  if (value === undefined || value === null || Number.isNaN(value)) return undefined;
+  return value >= threshold;
+}
+
+// ---------------------------------------------------------------------------
+// 모듈 1 — 사업장 기준 (RULE-CONTRACT.md ## 판정 모듈 1)
+// ---------------------------------------------------------------------------
+
+function evaluateModule1(input) {
+  const industryMatch = input.businessType && input.businessType.withinListedIndustries;
+  const capacityMet = gte(input.contractCapacityKw, THRESHOLDS.CONTRACT_CAPACITY_KW);
+
+  const conditionIndustry = industryMatch === undefined ? undefined : Boolean(industryMatch);
+  const three = and3(conditionIndustry, capacityMet);
+  const status = toStatus(three);
+
+  // applicability: 신설/전체이전일 때만 "이 모듈 자체의 filing 사유"가 성립한다.
+  // 증설·이설이어도 status 자체는 그대로 계산해서 모듈2·3의 선행조건으로
+  // 재사용한다 (RULE-CONTRACT.md "applicability(작업형태 범위) 명시" 절).
+  const applicability =
+    input.workType === WORK_TYPE.NEW || input.workType === WORK_TYPE.FULL_RELOCATION
+      ? APPLICABILITY.APPLICABLE
+      : APPLICABILITY.NOT_APPLICABLE_TO_WORK_TYPE;
+
+  return {
+    ruleId: 'M1',
+    status,
+    applicability,
+    legalBasis: [LAW_BASIS.DECREE_42_1.ruleId],
+    reason: describeModule1(conditionIndustry, input.contractCapacityKw),
+    inputsUsed: {
+      withinListedIndustries: conditionIndustry,
+      contractCapacityKw: input.contractCapacityKw,
+    },
+  };
+}
+
+function describeModule1(conditionIndustry, capacityKw) {
+  if (conditionIndustry === undefined || capacityKw === undefined) {
+    return '업종 또는 계약용량 정보가 없어 판단할 수 없음';
+  }
+  return conditionIndustry && capacityKw >= THRESHOLDS.CONTRACT_CAPACITY_KW
+    ? `13개 대상 업종 해당 + 계약용량 ${capacityKw}kW (>= ${THRESHOLDS.CONTRACT_CAPACITY_KW}kW)`
+    : `13개 대상 업종 ${conditionIndustry ? '해당' : '비해당'} + 계약용량 ${capacityKw}kW`;
+}
+
+// ---------------------------------------------------------------------------
+// 모듈 2 — 증설·교체·개조 (RULE-CONTRACT.md ## 판정 모듈 2)
+// ---------------------------------------------------------------------------
+
+function evaluateModule2(input, module1Result) {
+  const applicability =
+    input.workType === WORK_TYPE.MODIFICATION
+      ? APPLICABILITY.APPLICABLE
+      : APPLICABILITY.NOT_APPLICABLE_TO_WORK_TYPE;
+
+  // 선행조건: 모듈1의 status를 그대로 재사용한다(모듈1의 applicability와는
+  // 무관 — 증설 작업에서 모듈1은 NOT_APPLICABLE_TO_WORK_TYPE이어도 그
+  // status(TARGET/NOT_TARGET/UNKNOWN)는 여기서 그대로 쓴다).
+  const precondition = statusToThreeValued(module1Result.status);
+
+  const netIncreaseKw = computeModule2NetIncrease(input.module2);
+  const capacityMet = gte(netIncreaseKw, THRESHOLDS.MODULE2_RATED_CAPACITY_INCREASE_KW);
+
+  // 조건2("생산량 증가 또는 제품 변경 목적의 증설/교체/개조")는 작업형태를
+  // [증설·교체·개조]로 선택한 것 자체가 그 사실을 구성한다고 본다 —
+  // RULE-CONTRACT.md는 이를 별도 입력 항목으로 두지 않았다.
+  const three = and3(precondition, capacityMet);
+  const status = toStatus(three);
+
+  return {
+    ruleId: 'M2',
+    status,
+    applicability,
+    legalBasis: [LAW_BASIS.NOTICE_2_1_5_GA.ruleId],
+    reason: describeModule2(precondition, netIncreaseKw),
+    inputsUsed: {
+      module1Precondition: module1Result.status,
+      grossRatedCapacityIncreaseKw: input.module2 && input.module2.grossRatedCapacityIncreaseKw,
+      sameManufacturerSameModelExcludedKw:
+        input.module2 && input.module2.sameManufacturerSameModelExcludedKw,
+      netRatedCapacityIncreaseKw: netIncreaseKw,
+    },
+  };
+}
+
+// "동일 제조사·동일 모델 제외" 예외(NOTICE_2_1_5_GA)를 반영해 순증가분을 계산.
+// 이 계산은 반드시 여기서만 일어난다 — UI가 이 뺄셈을 대신 하지 않는다.
+function computeModule2NetIncrease(m2) {
+  if (!m2 || m2.grossRatedCapacityIncreaseKw === undefined) return undefined;
+  const excluded = m2.sameManufacturerSameModelExcludedKw || 0;
+  return m2.grossRatedCapacityIncreaseKw - excluded;
+}
+
+function describeModule2(precondition, netIncreaseKw) {
+  if (precondition === undefined) return '모듈1(사업장 기준) 확정 전이라 판단 불가';
+  if (precondition === false) return '모듈1(사업장 기준) 조건 불충족 사업장';
+  if (netIncreaseKw === undefined) return '정격용량 증가분 정보가 없어 판단할 수 없음';
+  return `정격용량 순증가분 ${netIncreaseKw}kW (동일 제조사·동일 모델 제외 반영, 기준 ${THRESHOLDS.MODULE2_RATED_CAPACITY_INCREASE_KW}kW)`;
+}
+
+// ---------------------------------------------------------------------------
+// 모듈 3 — 이설 (RULE-CONTRACT.md ## 판정 모듈 3, 세션4 3차 재감사로 전제조건 추가)
+// ---------------------------------------------------------------------------
+
+function evaluateModule3(input, module1Result) {
+  const applicability =
+    input.workType === WORK_TYPE.PARTIAL_RELOCATION
+      ? APPLICABILITY.APPLICABLE
+      : APPLICABILITY.NOT_APPLICABLE_TO_WORK_TYPE;
+
+  const precondition = statusToThreeValued(module1Result.status);
+  const relocatedCapacityMet = gte(
+    input.module3 && input.module3.relocatedRatedCapacityKw,
+    THRESHOLDS.MODULE3_RELOCATED_RATED_CAPACITY_KW
+  );
+
+  // 모듈2의 "동일 제조사·동일 모델 제외" 예외는 여기 적용하지 않는다
+  // (NOTICE_2_1_5_NA에서 확정 — 가목 전용 예외).
+  const three = and3(precondition, relocatedCapacityMet);
+  const status = toStatus(three);
+
+  return {
+    ruleId: 'M3',
+    status,
+    applicability,
+    legalBasis: [LAW_BASIS.NOTICE_2_1_5_NA.ruleId],
+    reason: describeModule3(precondition, input.module3 && input.module3.relocatedRatedCapacityKw),
+    inputsUsed: {
+      module1Precondition: module1Result.status,
+      relocatedRatedCapacityKw: input.module3 && input.module3.relocatedRatedCapacityKw,
+    },
+  };
+}
+
+function describeModule3(precondition, capacityKw) {
+  if (precondition === undefined) return '모듈1(사업장 기준) 확정 전이라 판단 불가';
+  if (precondition === false) return '모듈1(사업장 기준) 조건 불충족 사업장';
+  if (capacityKw === undefined) return '이설 설비 정격용량 정보가 없어 판단할 수 없음';
+  return `이설 설비 정격용량 합 ${capacityKw}kW (기준 ${THRESHOLDS.MODULE3_RELOCATED_RATED_CAPACITY_KW}kW)`;
+}
+
+function statusToThreeValued(status) {
+  if (status === STATUS.TARGET) return true;
+  if (status === STATUS.NOT_TARGET) return false;
+  return undefined;
+}
+
+// ---------------------------------------------------------------------------
+// 모듈 4 — 대상설비 5종 (RULE-CONTRACT.md ## 판정 모듈 4, 세션5 재작성)
+//
+// 세션5에서 법 제42조제1항제2호 원문("설치·이전하거나 그 주요 구조부분을
+// 변경하려는 경우")을 확보해 OPEN-ISSUE-M4-1을 해소했다. 모듈4는 작업형태에
+// 따라 배타적으로 다른 경로를 평가한다(모듈1~3과 동일한 패턴):
+//   - 신설/전체이전 → M4-설치/이전 (NOTICE_3 기준표)
+//   - 증설·교체·개조 → M4-주요구조부분변경 (NOTICE_2_1_6 가~마목)
+//   - 이설(부분이전) → 법적 근거 미확정(OPEN-ISSUE-M4-RELOCATION-PARTIAL) → UNKNOWN
+// 두 경로를 동시에 계산해 OR로 합치지 않는다 — 현재 작업형태에 해당하는
+// 경로만 평가한다(검토자 지적: workType이 MODIFICATION인데 input.equipment가
+// 기준표를 충족한다고 해서 설치경로가 TARGET에 기여하면 안 됨).
+// ---------------------------------------------------------------------------
+
+function evaluateModule4(input) {
+  const installation = evaluateM4Installation(input.equipment, input.workType);
+  const modification = evaluateM4Modification(input.equipmentChange, input.workType);
+
+  let status;
+  if (input.workType === WORK_TYPE.NEW || input.workType === WORK_TYPE.FULL_RELOCATION) {
+    status = installation.status;
+  } else if (input.workType === WORK_TYPE.MODIFICATION) {
+    status = modification.status;
+  } else if (input.workType === WORK_TYPE.PARTIAL_RELOCATION) {
+    // OPEN-ISSUE-M4-RELOCATION-PARTIAL: 법적 근거 미확정 — 추측해서
+    // TARGET/NOT_TARGET을 만들지 않는다. 항상 UNKNOWN.
+    status = STATUS.UNKNOWN;
+  } else {
+    status = STATUS.UNKNOWN;
+  }
+
+  const reason = describeModule4(input.workType, status, installation, modification);
+
+  return {
+    ruleId: 'M4',
+    status,
+    applicability: APPLICABILITY.APPLICABLE, // 모듈4는 항상 독립 평가 — applicability 분기 없음
+    legalBasis: [LAW_BASIS.DECREE_42_2.ruleId],
+    reason,
+    paths: { installation, modification },
+    unresolvedLegalIssue:
+      input.workType === WORK_TYPE.PARTIAL_RELOCATION ? 'OPEN-ISSUE-M4-RELOCATION-PARTIAL' : undefined,
+  };
+}
+
+function describeModule4(workType, status, installation, modification) {
+  if (workType === WORK_TYPE.PARTIAL_RELOCATION) {
+    return '이설(부분이전) 시 모듈4 판정기준이 RULE-CONTRACT.md에 미확정 — OPEN-ISSUE-M4-RELOCATION-PARTIAL';
+  }
+  const path = workType === WORK_TYPE.MODIFICATION ? modification : installation;
+  if (status === STATUS.TARGET) {
+    const hit = Object.entries(path.equipmentResults || {}).find(([, r]) => r && r.three === true);
+    return hit ? `${hit[0]}: ${hit[1].reason}` : '대상설비 조건 충족';
+  }
+  if (status === STATUS.UNKNOWN) return '대상설비 세부조건 일부 미입력';
+  return '입력된 대상설비 전부 조건 불충족';
+}
+
+// ---------------------------------------------------------------------------
+// M4-설치/이전 — 고시 제3조 기준표 (신설/전체이전에만 적용)
+// ---------------------------------------------------------------------------
+
+function evaluateM4Installation(eq, workType) {
+  const applicability =
+    workType === WORK_TYPE.NEW || workType === WORK_TYPE.FULL_RELOCATION
+      ? APPLICABILITY.APPLICABLE
+      : APPLICABILITY.NOT_APPLICABLE_TO_WORK_TYPE;
+
+  if (applicability !== APPLICABILITY.APPLICABLE) {
+    return { ruleId: 'M4-INSTALL', status: STATUS.NOT_TARGET, applicability, equipmentResults: {} };
+  }
+
+  // STEP4 자체를 아직 안 받은 경우(화면에 도달 안 함) 전체가 UNKNOWN.
+  if (eq === undefined) {
+    return {
+      ruleId: 'M4-INSTALL',
+      status: STATUS.UNKNOWN,
+      applicability,
+      equipmentResults: {},
+      reason: '대상설비 해당 여부 정보가 없어 판단할 수 없음',
+    };
+  }
+  // 사용자가 "없음"을 명시적으로 답한 경우 — 확정된 정보이므로 NOT_TARGET.
+  if (eq.none === true) {
+    return {
+      ruleId: 'M4-INSTALL',
+      status: STATUS.NOT_TARGET,
+      applicability,
+      equipmentResults: {},
+      reason: '대상설비 없음으로 확인됨',
+    };
+  }
+
+  const equipmentResults = {
+    meltingFurnace: evaluateMeltingFurnace_Installation(eq.meltingFurnace),
+    chemicalEquipment: evaluateChemicalEquipment_Installation(eq.chemicalEquipment),
+    dryingEquipment: evaluateDryingEquipment_Installation(eq.dryingEquipment),
+    gasWeldingAssembly: evaluateGasWeldingAssembly_Installation(eq.gasWeldingAssembly),
+    ventilation: evaluateVentilation_Installation(eq.ventilation),
+  };
+
+  const three = or3(
+    equipmentResults.meltingFurnace.three,
+    equipmentResults.chemicalEquipment.three,
+    equipmentResults.dryingEquipment.three,
+    equipmentResults.gasWeldingAssembly.three,
+    equipmentResults.ventilation.three
+  );
+
+  return {
+    ruleId: 'M4-INSTALL',
+    status: toStatus(three),
+    applicability,
+    legalBasis: [LAW_BASIS.NOTICE_3.ruleId, LAW_BASIS.NOTICE_2_4.ruleId],
+    equipmentResults,
+  };
+}
+
+// 각 설비 평가 함수 — evaluateXxx_Installation(), 법적 규칙 단위로 분리
+// (STEP 5 지시 11번). eq가 present!==true(선택 안 함)면 그 설비는 논의 대상이
+// 아니므로 3치 결과는 false(그 설비로 인한 TARGET 사유는 없음)로 취급한다.
+// present는 true인데 세부 수치가 없으면 unknown.
+
+function evaluateMeltingFurnace_Installation(eq) {
+  if (!eq || eq.present !== true) {
+    return { three: false, reason: '해당 없음' };
+  }
+  const three = gte(eq.capacityTon, THRESHOLDS.EQUIPMENT_MELTING_FURNACE_TON);
+  return {
+    three,
+    reason:
+      three === undefined
+        ? '용량 정보 없음'
+        : `용해로 ${eq.capacityTon}톤 (기준 ${THRESHOLDS.EQUIPMENT_MELTING_FURNACE_TON}톤)`,
+  };
+}
+
+function evaluateChemicalEquipment_Installation(eq) {
+  if (!eq || eq.present !== true) {
+    return { three: false, reason: '해당 없음' };
+  }
+  // OPEN-ISSUE(별표9): 안전보건규칙 별표9 물질별 기준량 수치는 이 저장소
+  // 범위 밖 — 호출자가 판정한 boolean만 받는다(law-basis.js NOTICE_3.openItems
+  // 참고). 시행령 제43조제2항 제외설비 여부(excludedByDecree43_2)는 세션5에서
+  // 근거가 확정됐다(DECREE_43_2 참고) — "시행령 제43조제2항에서 정한 설비에
+  // 해당하여 고시 제3조제2호의 화학설비 대상에서 제외되는가?"를 의미한다.
+  const meetsThreshold = eq.meetsHazardousSubstanceThreshold; // boolean | undefined
+  const excluded = eq.excludedByDecree43_2 === true;
+
+  if (excluded) {
+    return { three: false, reason: '시행령 제43조제2항 제외설비로 확인됨(고시 제3조제2호 단서)' };
+  }
+  return {
+    three: meetsThreshold === undefined ? undefined : Boolean(meetsThreshold),
+    reason:
+      meetsThreshold === undefined
+        ? '위험물질 기준량 충족 여부 미확인(별표9 수치는 이 저장소 범위 밖)'
+        : meetsThreshold
+        ? '안전보건규칙 별표9 위험물질 기준량 충족'
+        : '안전보건규칙 별표9 위험물질 기준량 미충족',
+  };
+}
+
+function evaluateDryingEquipment_Installation(eq) {
+  if (!eq || eq.present !== true) {
+    return { three: false, reason: '해당 없음' };
+  }
+  const sizeCondition = or3(
+    gte(eq.fuelConsumptionKgPerHour, THRESHOLDS.EQUIPMENT_DRYING_FUEL_KG_PER_HOUR),
+    gte(eq.ratedPowerKw, THRESHOLDS.EQUIPMENT_DRYING_RATED_POWER_KW)
+  );
+  const purposeCondition = isValidDryingPurpose(eq.purpose);
+
+  const three = and3(sizeCondition, purposeCondition);
+  return {
+    three,
+    reason:
+      three === undefined
+        ? '연료소비량/정격소비전력 또는 건조목적 정보 없음'
+        : `건조설비 규모+목적 조건 ${three ? '충족' : '불충족'}`,
+  };
+}
+
+function evaluateGasWeldingAssembly_Installation(eq) {
+  if (!eq || eq.present !== true) {
+    return { three: false, reason: '해당 없음' };
+  }
+  const three = and3(
+    gte(eq.flammableGasQuantityKg, THRESHOLDS.EQUIPMENT_GAS_WELDING_ASSEMBLY_KG),
+    eq.isFixed === undefined ? undefined : Boolean(eq.isFixed)
+  );
+  return {
+    three,
+    reason:
+      three === undefined
+        ? '인화성가스 집합량 또는 고정식 여부 정보 없음'
+        : `인화성가스 ${eq.flammableGasQuantityKg}kg, 고정식 ${eq.isFixed ? 'O' : 'X'} (기준 ${THRESHOLDS.EQUIPMENT_GAS_WELDING_ASSEMBLY_KG}kg)`,
+  };
+}
+
+function evaluateVentilation_Installation(eq) {
+  if (!eq || eq.present !== true) {
+    return { three: false, reason: '해당 없음' };
+  }
+  if (eq.substanceCategory === undefined || eq.exhaustAirVolumeM3PerMin === undefined) {
+    return { three: undefined, reason: '물질 구분 또는 배풍량 정보 없음' };
+  }
+  const threshold =
+    eq.substanceCategory === 'NOTICE_TABLE1_ITEM7'
+      ? THRESHOLDS.EQUIPMENT_VENTILATION_NOTICE_TABLE1_ITEM7_M3_PER_MIN
+      : THRESHOLDS.EQUIPMENT_VENTILATION_PERMIT_OR_MANAGED_OR_DUST_M3_PER_MIN;
+  const three = eq.exhaustAirVolumeM3PerMin >= threshold;
+  return { three, reason: `배풍량 ${eq.exhaustAirVolumeM3PerMin}㎥/분 (기준 ${threshold}㎥/분)` };
+}
+
+// 건조설비의 "목적" 값이 고시 제3조제3호 각목(유기화합물건조/도료피막코팅표면
+// 건조/가연성분말분진) 중 하나에 해당하는지 — M4-설치와 M4-변경(경로B) 둘 다
+// 이 함수를 공유한다(제3조제3호 "목적분류"는 재사용, 크기기준은 재사용 안 함).
+function isValidDryingPurpose(purpose) {
+  if (purpose === undefined) return undefined;
+  return (
+    purpose === 'ORGANIC_COMPOUND' ||
+    purpose === 'COATING_FLAMMABLE_VAPOR' ||
+    purpose === 'COMBUSTIBLE_DUST'
+  );
+}
+
+// ---------------------------------------------------------------------------
+// M4-주요구조부분변경 — 고시 제2조제1항제6호 가~마목 (증설·교체·개조에만 적용)
+//
+// 전제(도입부 "~설비 중"): 각 목 전부 "해당 설비가 이미 고시 제3조 기준을
+// 충족하는 대상설비"라는 것을 전제한다 — existingTarget 입력으로 받는다.
+// 이 값은 Engine이 다시 계산하는 게 아니라 호출자가 넘기는 입력 사실이다
+// (검토자 지적: "기존 대상설비 여부"와 "현재 변경행위"를 한 Engine 안에서
+// 순환적으로 섞지 않기 위함) — Snapshot에도 입력 그대로 기록된다.
+// ---------------------------------------------------------------------------
+
+function evaluateM4Modification(change, workType) {
+  const applicability =
+    workType === WORK_TYPE.MODIFICATION
+      ? APPLICABILITY.APPLICABLE
+      : APPLICABILITY.NOT_APPLICABLE_TO_WORK_TYPE;
+
+  if (applicability !== APPLICABILITY.APPLICABLE) {
+    return { ruleId: 'M4-CHANGE', status: STATUS.NOT_TARGET, applicability, equipmentResults: {} };
+  }
+
+  // 검토자 지적: 증설·교체·개조 작업인데 equipmentChange 자체가 없으면
+  // "변경 대상이 없다"(false)가 아니라 "입력 자체가 없다"(UNKNOWN)다.
+  if (change === undefined) {
+    return {
+      ruleId: 'M4-CHANGE',
+      status: STATUS.UNKNOWN,
+      applicability,
+      equipmentResults: {},
+      reason: '대상설비 변경사항 정보가 없어 판단할 수 없음',
+    };
+  }
+
+  const equipmentResults = {
+    meltingFurnace: evaluateMeltingFurnace_Change(change.meltingFurnace),
+    chemicalEquipment: evaluateChemicalEquipment_Change(change.chemicalEquipment),
+    dryingEquipment: evaluateDryingEquipment_Change(change.dryingEquipment),
+    gasWeldingAssembly: evaluateGasWeldingAssembly_Change(change.gasWeldingAssembly),
+    ventilation: evaluateVentilation_Change(change.ventilation),
+  };
+
+  const three = or3(
+    equipmentResults.meltingFurnace.three,
+    equipmentResults.chemicalEquipment.three,
+    equipmentResults.dryingEquipment.three,
+    equipmentResults.gasWeldingAssembly.three,
+    equipmentResults.ventilation.three
+  );
+
+  return {
+    ruleId: 'M4-CHANGE',
+    status: toStatus(three),
+    applicability,
+    legalBasis: [LAW_BASIS.NOTICE_2_1_6.ruleId],
+    equipmentResults,
+  };
+}
+
+// eq가 아예 없으면(해당 설비에 대한 응답 자체가 없으면) 그 설비는 판정할
+// 정보가 없다는 뜻 — false가 아니라 undefined(그 설비 자체는 or3 결합에서
+// unknown으로 잡히되, existingTarget이 명시적으로 false면 and3가 그 즉시
+// NOT_TARGET으로 확정한다).
+
+function evaluateMeltingFurnace_Change(eq) {
+  if (!eq) return { three: undefined, reason: '변경사항 정보 없음' };
+  const three = and3(toThreeValued(eq.existingTarget), toThreeValued(eq.heatSourceTypeChanged));
+  return { three, reason: describeChangeReason(three, '용해로 열원 종류 변경') };
+}
+
+function evaluateChemicalEquipment_Change(eq) {
+  if (!eq) return { three: undefined, reason: '변경사항 정보 없음' };
+  const trigger = or3(
+    toThreeValued(eq.productionOrMaterialChangeReplacement),
+    toThreeValued(eq.managedSubstanceEquipmentChangeCausingVelocityDecreaseOrAirflowIncrease)
+  );
+  const three = and3(toThreeValued(eq.existingTarget), trigger);
+  return { three, reason: describeChangeReason(three, '화학설비 교체·변경·추가 또는 유해물질설비 변경') };
+}
+
+function evaluateDryingEquipment_Change(eq) {
+  if (!eq) return { three: undefined, reason: '변경사항 정보 없음' };
+  const existingTarget = toThreeValued(eq.existingTarget);
+
+  // 경로A: 열원 종류 변경
+  const pathA = and3(existingTarget, toThreeValued(eq.heatSourceTypeChanged));
+  // 경로B: 건조대상물 변경 + 신규 목적이 제3조제3호 각목 재해당(크기기준 재적용 안 함)
+  const pathB = and3(
+    existingTarget,
+    toThreeValued(eq.dryingTargetChanged),
+    isValidDryingPurpose(eq.newPurpose)
+  );
+
+  const three = or3(pathA, pathB);
+  return { three, reason: describeChangeReason(three, '건조설비 열원종류 변경 또는 건조대상물 변경') };
+}
+
+function evaluateGasWeldingAssembly_Change(eq) {
+  if (!eq) return { three: undefined, reason: '변경사항 정보 없음' };
+  const three = and3(toThreeValued(eq.existingTarget), toThreeValued(eq.mainPipeStructureChanged));
+  return { three, reason: describeChangeReason(three, '가스집합용접장치 주관 구조 변경') };
+}
+
+function evaluateVentilation_Change(eq) {
+  if (!eq) return { three: undefined, reason: '변경사항 정보 없음' };
+  const three = and3(
+    toThreeValued(eq.existingTarget),
+    toThreeValued(eq.equipmentChangeCausingVelocityDecreaseOrAirflowIncrease)
+  );
+  return { three, reason: describeChangeReason(three, '유해물질/분진 설비 추가·변경으로 풍속감소·배풍량증가') };
+}
+
+function toThreeValued(value) {
+  return value === undefined ? undefined : Boolean(value);
+}
+
+function describeChangeReason(three, label) {
+  if (three === undefined) return `${label} — 기존 대상설비 여부 또는 변경사항 정보 없음`;
+  return three ? `${label}: 조건 충족` : `${label}: 조건 불충족`;
+}
+
+// ---------------------------------------------------------------------------
+// finalStatus / determinationCompleteness 집계
+// (RULE-CONTRACT.md "결과 상태" 절 그대로 — Invariant 8, 9)
+//
+// 집계는 applicability===APPLICABLE인 모듈만 대상으로 한다.
+// NOT_APPLICABLE_TO_WORK_TYPE 모듈은 NOT_TARGET으로 잘못 세지 않는다
+// (STEP 5 지시 13번).
+// ---------------------------------------------------------------------------
+
+function aggregate(moduleResults) {
+  const applicableResults = Object.values(moduleResults).filter(
+    (m) => m.applicability === APPLICABILITY.APPLICABLE
+  );
+
+  const hasTarget = applicableResults.some((m) => m.status === STATUS.TARGET);
+  const hasUnknown = applicableResults.some((m) => m.status === STATUS.UNKNOWN);
+
+  let finalStatus;
+  if (hasTarget) finalStatus = STATUS.TARGET;
+  else if (hasUnknown) finalStatus = STATUS.UNKNOWN;
+  else finalStatus = STATUS.NOT_TARGET;
+
+  const determinationCompleteness = hasUnknown ? 'INCOMPLETE' : 'COMPLETE';
+
+  const reasons = applicableResults.filter((m) => m.status === STATUS.TARGET).map((m) => m.ruleId);
+
+  return { finalStatus, determinationCompleteness, reasons };
+}
+
+// ---------------------------------------------------------------------------
+// evaluate() — 유일한 공개 진입점
+// ---------------------------------------------------------------------------
+
+/**
+ * @param {object} input  Engine Input (아래 README-ENGINE.md 참고)
+ * @param {object} [meta] { snapshotId, now } — Engine이 시간에 의존하지
+ *   않기 위해 호출자가 명시적으로 넘긴다. 생략 가능(그러면 snapshot에
+ *   해당 필드가 없다 — undefined를 스스로 생성하지 않는다).
+ * @returns {object} Snapshot — 불변(Object.freeze)
+ */
+function evaluate(input, meta) {
+  const module1 = evaluateModule1(input);
+  const module2 = evaluateModule2(input, module1);
+  const module3 = evaluateModule3(input, module1);
+  const module4 = evaluateModule4(input);
+
+  const moduleResults = Object.freeze({ module1, module2, module3, module4 });
+  const { finalStatus, determinationCompleteness, reasons } = aggregate(moduleResults);
+
+  const snapshot = {
+    snapshotId: meta && meta.snapshotId,
+    createdAt: meta && meta.now,
+    engineVersion: ENGINE_VERSION,
+    ruleVersion: RULE_VERSION,
+    input: deepFreeze(clone(input)),
+    moduleResults: deepFreeze(clone(moduleResults)),
+    finalStatus,
+    determinationCompleteness,
+    reasons: Object.freeze(reasons),
+  };
+
+  return deepFreeze(snapshot);
+}
+
+function clone(value) {
+  return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
+}
+
+function deepFreeze(obj) {
+  if (obj && typeof obj === 'object' && !Object.isFrozen(obj)) {
+    Object.values(obj).forEach(deepFreeze);
+    Object.freeze(obj);
+  }
+  return obj;
+}
+
+module.exports = {
+  evaluate,
+  STATUS,
+  APPLICABILITY,
+  ENGINE_VERSION,
+  RULE_VERSION,
+  INDUSTRY_LIST,
+  // 아래는 테스트·회귀검증 전용 export (내부 모듈 단위 검증용)
+  _internal: {
+    and3,
+    or3,
+    evaluateModule1,
+    evaluateModule2,
+    evaluateModule3,
+    evaluateModule4,
+    aggregate,
+  },
+};
+
+},
+'./report.js': function (module, exports, require) {
+/**
+ * report.js — STEP 6-1 Report 계층 (REPORT-DESIGN.md 구현)
+ *
+ *   Snapshot ──▶ buildReportModel(snapshot, lawBasis, ctx) ──▶ ReportModel
+ *                ReportModel ──▶ toUserView(model) ──▶ UserView (허용 목록만)
+ *
+ * 계약 (REPORT-DESIGN.md / UI-DESIGN.md):
+ *  - Snapshot을 읽기만 한다(변경 금지). Engine을 호출하지 않는다.
+ *  - engine.js / data.js를 import하지 않는다. LAW_BASIS와 현재 ruleVersion은 인자로 받는다.
+ *  - 임계값 재계산, 법령 조건 재판정, `reason` 파싱을 하지 않는다.
+ *  - three:true=조건 충족 / three:false=조건 미충족 / three 키 없음=확인 필요 — 그 이상 해석하지 않는다.
+ *  - N/A 모듈·경로의 status는 결과로 표시하지 않는다(applicability 우선).
+ *  - 제6조(제출면제), Pro/Free 분기는 존재하지 않는다.
+ *  - 개발자용 provenance(note, openItems, ruleContractRef, ruleId, reason, ruleVersion 원문 등)는
+ *    ReportModel에만 보존되고, toUserView의 허용 목록 밖이므로 사용자 화면으로 전달되지 않는다.
+ *
+ * 아래 상수 문자열(status/applicability/workType 값)은 Snapshot의 값 어휘를 그대로 적은 것이며,
+ * 일치 여부는 tests-ui.js의 계약 테스트가 engine.js/data.js와 대조해 검증한다.
+ */
+'use strict';
+
+// ---- Snapshot 값 어휘 (계약 테스트가 Engine과 대조) -----------------------------
+const V = Object.freeze({
+  TARGET: 'TARGET',
+  NOT_TARGET: 'NOT_TARGET',
+  UNKNOWN: 'UNKNOWN',
+  APPLICABLE: 'APPLICABLE',
+  COMPLETE: 'COMPLETE',
+  INCOMPLETE: 'INCOMPLETE',
+});
+
+// ---- 사용자 문구 (UI-DESIGN.md §12-2, §12-5, §12-6) ---------------------------------
+const COPY = Object.freeze({
+  headline: Object.freeze({
+    'TARGET|COMPLETE': { text: '유해·위험방지계획서 제출 대상에 해당합니다.', subtitle: null, tone: 'target' },
+    'TARGET|INCOMPLETE': {
+      text: '유해·위험방지계획서 제출 대상에 해당합니다.',
+      subtitle: '일부 확인이 필요한 항목이 있습니다.',
+      tone: 'target',
+    },
+    'UNKNOWN|INCOMPLETE': { text: '대상 여부 확인이 필요합니다.', subtitle: null, tone: 'unknown' },
+    'NOT_TARGET|COMPLETE': {
+      text: '입력하신 내용 기준으로는 제출 대상에 해당하지 않습니다.',
+      subtitle: null,
+      tone: 'nontarget',
+    },
+  }),
+  // 승인 4종 밖의 조합 — 임의 문구를 만들지 않고 오류 상태로 표시한다.
+  headlineError: '결과를 표시할 수 없습니다. 처음부터 다시 시도해 주세요.',
+  workType: Object.freeze({
+    NEW: '신설',
+    FULL_RELOCATION: '전체 이전',
+    PARTIAL_RELOCATION: '일부 설비 이전(이설)',
+    MODIFICATION: '증설·교체·개조(주요 구조부분 변경)',
+  }),
+  notApplicable: '이번 작업 유형에는 적용되지 않음',
+  inactivePath: '이번 작업 유형에는 적용되지 않는 경로',
+  result: Object.freeze({ TARGET: '대상', NOT_TARGET: '대상 아님', UNKNOWN: '확인 필요' }),
+  precondition: Object.freeze({ TARGET: '충족', NOT_TARGET: '미충족', UNKNOWN: '확인 필요' }),
+  preconditionNote: '독립 제출 사유가 아니라 다른 항목의 전제조건입니다.',
+  row: Object.freeze({ MET: '조건 충족', NOT_MET: '조건 미충족', UNKNOWN: '확인 필요' }),
+  versionBanner: '이 결과는 현재와 다른 판정 기준으로 만들어졌습니다. 최신 기준으로 다시 확인해 주세요.',
+  // 이설 M4 — 승인된 고정 문구(UI-DESIGN §12-5, 그대로)
+  unresolved: Object.freeze([
+    '일부 설비 이전(이설) 시 대상설비 5종의 적용 기준이 아직 확정되지 않았습니다.',
+    "따라서 이 항목은 '대상 아님'으로 처리하지 않고 '확인 필요'로 남깁니다. 이 항목이 확인되지 않아 전체 판단이 완전하지 않습니다.",
+    '이설에 해당하는 경우 관련 기준을 별도로 확인해 주세요.',
+  ]),
+  reliability: Object.freeze({ PRIMARY: '1차 자료 대조 확인' }),
+  basisMissing: '근거 데이터 없음',
+});
+
+const MODULES = Object.freeze([
+  { id: 'M1', key: 'module1', label: '사업장 기준 (업종·계약용량)', target: 'business', input: '사업장 기준(업종·계약용량) 정보가 부족합니다.' },
+  { id: 'M2', key: 'module2', label: '증설·교체·개조 (정격용량)', target: 'increase', input: '증설·교체·개조 정격용량 정보가 부족합니다.' },
+  { id: 'M3', key: 'module3', label: '일부 설비 이전·이설 (정격용량)', target: 'relocation', input: '이설 설비 정격용량 정보가 부족합니다.' },
+]);
+const M4_LABEL = '대상설비 5종';
+const M4_TARGET = 'equipment';
+const M4_PATH_UNKNOWN_TEXT = '대상설비 해당 여부 정보가 부족합니다.';
+
+const EQUIPMENT = Object.freeze([
+  { key: 'meltingFurnace', label: '용해로' },
+  { key: 'chemicalEquipment', label: '화학설비' },
+  { key: 'dryingEquipment', label: '건조설비' },
+  { key: 'gasWeldingAssembly', label: '가스집합용접장치' },
+  { key: 'ventilation', label: '유해물질 밀폐·환기·배기설비' },
+]);
+const PATHS = Object.freeze([
+  { key: 'installation', label: '설치·전체 이전 기준' },
+  { key: 'modification', label: '주요 구조부분 변경 기준' },
+]);
+
+// ---- 작은 헬퍼 (모두 Snapshot 읽기 전용) -------------------------------------------
+function statusKey(s) {
+  // 알 수 없는 값은 fail-closed로 '확인 필요'. NOT_TARGET으로 바꾸지 않는다.
+  return s === V.TARGET || s === V.NOT_TARGET ? s : V.UNKNOWN;
+}
+
+function lookupBasis(ids, lawBasis) {
+  const seen = new Set();
+  const out = [];
+  for (const id of ids || []) {
+    if (seen.has(id)) continue;
+    seen.add(id);
+    const e = lawBasis && Object.prototype.hasOwnProperty.call(lawBasis, id) ? lawBasis[id] : undefined;
+    out.push({
+      ruleId: id, // provenance (사용자 화면 금지)
+      found: !!e,
+      statute: e ? e.statute : undefined,
+      text: e ? e.text : undefined,
+      effectiveDate: e ? e.effectiveDate : undefined,
+      noticeNo: e ? e.noticeNo : undefined,
+      reliability: e ? e.reliability : undefined,
+      note: e ? e.note : undefined, // provenance
+      openItems: e ? e.openItems : undefined, // provenance
+      ruleContractRef: e ? e.ruleContractRef : undefined, // provenance
+    });
+  }
+  return out;
+}
+
+function buildModuleModel(def, snap, lawBasis, anyDependentApplicable) {
+  const r = snap.moduleResults && snap.moduleResults[def.key];
+  const applicable = !!r && r.applicability === V.APPLICABLE;
+  let display;
+  if (applicable) display = 'APPLICABLE';
+  else if (def.id === 'M1' && anyDependentApplicable) display = 'PRECONDITION'; // M2/M3가 전제조건으로 사용
+  else display = 'NOT_APPLICABLE';
+  return {
+    id: def.id,
+    label: def.label,
+    target: def.target,
+    display,
+    resultKey: r ? statusKey(r.status) : V.UNKNOWN,
+    basis: lookupBasis(r && r.legalBasis, lawBasis),
+    reasonRaw: r ? r.reason : undefined, // provenance (사용자 화면 금지)
+    inputsUsedRaw: r ? r.inputsUsed : undefined, // provenance
+  };
+}
+
+function buildPathModel(def, p, lawBasis) {
+  if (!p) return { kind: def.key, label: def.label, present: false, applicable: false, rows: [], basis: [] };
+  const applicable = p.applicability === V.APPLICABLE;
+  const results = p.equipmentResults || {};
+  const hasAnyKey = Object.keys(results).length > 0;
+  const pathStatus = statusKey(p.status);
+  // 설비 행: 적용 경로이면서, (결과 키가 하나라도 있거나 경로가 확인 필요)일 때만. 키 없음 = 확인 필요(C1).
+  // 경로가 '대상 아님'이고 결과 키가 없는 경우(해당 설비 없음 확정)에는 행 없이 경로 수준 결과만 표시한다.
+  const showRows = applicable && (hasAnyKey || pathStatus === V.UNKNOWN);
+  const rows = showRows
+    ? EQUIPMENT.map((e) => {
+        const has = Object.prototype.hasOwnProperty.call(results, e.key);
+        const item = has ? results[e.key] : undefined;
+        const three = item && Object.prototype.hasOwnProperty.call(item, 'three') ? item.three : undefined;
+        const state = three === true ? 'MET' : three === false ? 'NOT_MET' : 'UNKNOWN';
+        return { key: e.key, label: e.label, state, reasonRaw: item ? item.reason : undefined };
+      })
+    : [];
+  return {
+    kind: def.key,
+    label: def.label,
+    present: true,
+    applicable,
+    resultKey: pathStatus,
+    rows,
+    basis: lookupBasis(p.legalBasis, lawBasis),
+    reasonRaw: p.reason, // provenance
+  };
+}
+
+/**
+ * Snapshot → ReportModel. Snapshot을 변경하지 않는다.
+ * @param {object} snapshot  Engine이 만든 Snapshot
+ * @param {object} lawBasis  LAW_BASIS (호출자가 전달)
+ * @param {object} [ctx]     { currentRuleVersion } — ruleVersion 불일치 여부 비교용(원문은 모델에만 보존)
+ */
+function buildReportModel(snapshot, lawBasis, ctx) {
+  const snap = snapshot || {};
+  const mr = snap.moduleResults || {};
+  const key = String(snap.finalStatus) + '|' + String(snap.determinationCompleteness);
+  const headline = Object.prototype.hasOwnProperty.call(COPY.headline, key)
+    ? { ok: true, key, ...COPY.headline[key] }
+    : { ok: false, key, text: COPY.headlineError, subtitle: null, tone: 'error' };
+
+  const dependentApplicable = ['module2', 'module3'].some((k) => mr[k] && mr[k].applicability === V.APPLICABLE);
+  const modules = MODULES.map((d) => buildModuleModel(d, snap, lawBasis, dependentApplicable));
+
+  // 모듈 4
+  const m4r = mr.module4;
+  const paths = PATHS.map((d) => buildPathModel(d, m4r && m4r.paths && m4r.paths[d.key], lawBasis));
+  const m4Basis = lookupBasis(
+    [].concat((m4r && m4r.legalBasis) || [], ...paths.filter((p) => p.applicable).map((p) => p.basis.map((b) => b.ruleId))),
+    lawBasis
+  );
+  const m4 = {
+    label: M4_LABEL,
+    target: M4_TARGET,
+    resultKey: m4r ? statusKey(m4r.status) : V.UNKNOWN,
+    unresolved: !!(m4r && m4r.unresolvedLegalIssue),
+    unresolvedRaw: m4r ? m4r.unresolvedLegalIssue : undefined, // provenance
+    paths,
+    basis: m4Basis,
+    reasonRaw: m4r ? m4r.reason : undefined, // provenance
+  };
+
+  // 대상 판단 근거(B): reasons는 '대상 모듈' 식별에만 쓴다. M4의 대상 설비는 equipmentResults(three:true)에서만 도출한다.
+  const reasonIds = Array.isArray(snap.reasons) ? snap.reasons : [];
+  const targetModules = [];
+  for (const m of modules) {
+    if (reasonIds.includes(m.id)) targetModules.push({ label: m.label, equipment: [] });
+  }
+  if (reasonIds.includes('M4')) {
+    const equipment = [];
+    for (const p of paths) {
+      if (!p.applicable) continue;
+      for (const r of p.rows) if (r.state === 'MET') equipment.push(r.label);
+    }
+    targetModules.push({ label: M4_LABEL, equipment });
+  }
+
+  // 확인 필요(E) — 문구 출처: 구조 필드 기반 고정 문구 / 이설 고정 문구 / 입력 보완 안내(구조에서 직접 확인되는 범위)
+  const confirmItems = [];
+  const addItem = (kind, target, text) => {
+    if (!confirmItems.some((i) => i.text === text)) confirmItems.push({ kind, target, text });
+  };
+  const m1 = modules[0];
+  if (m1.display === 'PRECONDITION' && m1.resultKey === V.UNKNOWN) addItem('INPUT', m1.target, MODULES[0].input);
+  modules.forEach((m, i) => {
+    if (m.display === 'APPLICABLE' && m.resultKey === V.UNKNOWN) addItem('INPUT', m.target, MODULES[i].input);
+  });
+  if (m4.unresolved) {
+    addItem('UNRESOLVED', M4_TARGET, COPY.unresolved.join(' '));
+  } else if (m4.resultKey === V.UNKNOWN) {
+    let added = false;
+    for (const p of paths) {
+      if (!p.applicable) continue;
+      for (const r of p.rows) {
+        if (r.state === 'UNKNOWN') {
+          addItem('INPUT', M4_TARGET, r.label + ': 세부 조건 입력이 필요합니다.');
+          added = true;
+        }
+      }
+    }
+    if (!added) addItem('INPUT', M4_TARGET, M4_PATH_UNKNOWN_TEXT);
+  }
+
+  const cur = ctx && ctx.currentRuleVersion;
+  const meta = {
+    createdAt: typeof snap.createdAt === 'string' ? snap.createdAt : undefined,
+    snapshotId: snap.snapshotId, // provenance
+    engineVersion: snap.engineVersion, // provenance
+    ruleVersion: snap.ruleVersion, // provenance (원문은 사용자 화면 금지)
+    ruleVersionMismatch: cur !== undefined && snap.ruleVersion !== cur,
+  };
+
+  return {
+    headline,
+    finalStatus: snap.finalStatus, // provenance
+    determinationCompleteness: snap.determinationCompleteness, // provenance
+    workType: snap.input ? snap.input.workType : undefined,
+    targetModules,
+    modules,
+    m4,
+    confirmItems,
+    meta,
+  };
+}
+
+// ---- ReportModel → UserView (허용 목록 투영) -----------------------------------------
+function userBasis(list) {
+  return (list || []).map((b) =>
+    b.found
+      ? {
+          missing: false,
+          statute: b.statute,
+          text: b.text,
+          effectiveDate: b.effectiveDate,
+          noticeNo: b.noticeNo,
+          reliabilityLabel: Object.prototype.hasOwnProperty.call(COPY.reliability, b.reliability)
+            ? COPY.reliability[b.reliability]
+            : null,
+        }
+      : { missing: true, message: COPY.basisMissing } // 내부 ID는 노출하지 않는다
+  );
+}
+
+function toneOf(k) {
+  return k === V.TARGET ? 'target' : k === V.UNKNOWN ? 'unknown' : 'neutral';
+}
+
+/**
+ * ReportModel → UserView. **허용 목록**: 여기서 명시적으로 만든 필드만 존재한다.
+ * note / openItems / ruleContractRef / ruleId / reason / ruleVersion·engineVersion·snapshotId 원문은 포함되지 않는다.
+ */
+function toUserView(model) {
+  const m = model;
+  const modules = m.modules.map((x) => {
+    if (x.display === 'APPLICABLE') {
+      return {
+        label: x.label,
+        target: x.target,
+        display: 'APPLICABLE',
+        resultLabel: COPY.result[x.resultKey],
+        tone: toneOf(x.resultKey),
+        basis: userBasis(x.basis),
+      };
+    }
+    if (x.display === 'PRECONDITION') {
+      return {
+        label: x.label,
+        target: x.target,
+        display: 'PRECONDITION',
+        resultLabel: COPY.precondition[x.resultKey],
+        tone: toneOf(x.resultKey),
+        message: COPY.preconditionNote,
+        basis: userBasis(x.basis),
+      };
+    }
+    // N/A — status는 전달하지 않는다
+    return { label: x.label, target: x.target, display: 'NOT_APPLICABLE', message: COPY.notApplicable, basis: [] };
+  });
+
+  const m4 = {
+    label: m.m4.label,
+    target: m.m4.target,
+    resultLabel: COPY.result[m.m4.resultKey],
+    tone: toneOf(m.m4.resultKey),
+    unresolvedLines: m.m4.unresolved ? COPY.unresolved.slice() : null,
+    paths: m.m4.paths
+      .filter((p) => p.applicable && !m.m4.unresolved)
+      .map((p) => ({
+        label: p.label,
+        resultLabel: COPY.result[p.resultKey],
+        tone: toneOf(p.resultKey),
+        rows: p.rows.map((r) => ({
+          label: r.label,
+          stateLabel: COPY.row[r.state],
+          tone: r.state === 'MET' ? 'target' : r.state === 'UNKNOWN' ? 'unknown' : 'neutral',
+        })),
+      })),
+    inactivePaths: m.m4.paths.filter((p) => p.present && !p.applicable).map((p) => p.label),
+    inactiveMessage: COPY.inactivePath,
+    basis: userBasis(m.m4.basis),
+  };
+
+  return {
+    headline: { text: m.headline.text, subtitle: m.headline.subtitle, tone: m.headline.tone, ok: m.headline.ok },
+    workTypeLabel: Object.prototype.hasOwnProperty.call(COPY.workType, m.workType) ? COPY.workType[m.workType] : null,
+    targetModules: m.targetModules.map((t) => ({ label: t.label, equipment: t.equipment.slice() })),
+    confirmItems: m.confirmItems.map((i) => ({ kind: i.kind, target: i.target, text: i.text })),
+    modules,
+    m4,
+    footer: {
+      createdAt: m.meta.createdAt || null,
+      versionMismatch: !!m.meta.ruleVersionMismatch,
+      versionBanner: m.meta.ruleVersionMismatch ? COPY.versionBanner : null,
+    },
+  };
+}
+
+module.exports = { buildReportModel, toUserView, REPORT_COPY: COPY, REPORT_VOCAB: V, REPORT_EQUIPMENT: EQUIPMENT };
+
+},
+'./ui-model.js': function (module, exports, require) {
+/**
+ * ui-model.js — STEP 6-2 UI 입력 모델 (UI-DESIGN.md §2, §4 구현)
+ *
+ * 이 파일은 "질문을 어떻게 보여주고 사용자 답을 Engine 입력 스키마로 어떻게 옮기는가"만 다룬다.
+ *  - 법적 판정, 임계값 비교, 파생값(순증가분 등) 계산을 하지 않는다.
+ *  - engine.js / data.js를 import하지 않는다(열거값은 아래 상수로 두고 tests-ui.js가 data.js와 대조한다).
+ *  - "모름"은 키 생략, "포함 안 됨/해당 설비 없음"만 false(또는 none:true), 빈 객체는 만들지 않는다.
+ *  - UI는 Engine의 현재 계약을 보정하지 않는다(OPEN-ISSUE-ENGINE-M4-CHEM-EXCLUSION-UNKNOWN 포함).
+ */
+'use strict';
+
+// ---- Engine 입력 어휘(계약 테스트가 data.js와 대조) ----------------------------------
+const WORK = Object.freeze({
+  NEW: 'NEW',
+  FULL_RELOCATION: 'FULL_RELOCATION',
+  MODIFICATION: 'MODIFICATION',
+  PARTIAL_RELOCATION: 'PARTIAL_RELOCATION',
+});
+const DRYING = Object.freeze({
+  ORGANIC: 'ORGANIC_COMPOUND',
+  COATING: 'COATING_FLAMMABLE_VAPOR',
+  DUST: 'COMBUSTIBLE_DUST',
+  OTHER: 'OTHER_NOT_IN_ARTICLE3', // D-B: 3종 어디에도 해당하지 않음(UI 규약 값)
+});
+const VENT = Object.freeze({
+  T1: 'NOTICE_TABLE1_ITEM7',
+  T16: 'PERMIT_OR_MANAGED_OR_DUST_TABLE16',
+});
+
+// 화면(DOM)에는 Engine 열거값을 쓰지 않는다 — 상태/DOM은 UI 토큰을 쓰고, Engine 값으로의 변환은 이 파일 안에서만 한다.
+const UI_WORK = Object.freeze({ new: WORK.NEW, full: WORK.FULL_RELOCATION, modify: WORK.MODIFICATION, partial: WORK.PARTIAL_RELOCATION });
+const UI_DRY = Object.freeze({ organic: DRYING.ORGANIC, coating: DRYING.COATING, dust: DRYING.DUST, other: DRYING.OTHER });
+const UI_VENT = Object.freeze({ cat1: VENT.T1, cat2: VENT.T16 });
+
+// 화면(DOM)에서는 엔진 내부 키를 쓰지 않는다 — UI id ↔ 엔진 키 매핑은 이 파일 안에서만 존재한다.
+const EQUIP_IDS = Object.freeze(['melt', 'chem', 'dry', 'gas', 'vent']);
+const ENGINE_KEY = Object.freeze({
+  melt: 'meltingFurnace',
+  chem: 'chemicalEquipment',
+  dry: 'dryingEquipment',
+  gas: 'gasWeldingAssembly',
+  vent: 'ventilation',
+});
+
+// ---- 흐름표(선언형) — RULE-CONTRACT STEP 1~6(정정 2026-10-01) ------------------------
+const STEP_NUMBER = Object.freeze({
+  workType: 1,
+  industry: 2,
+  contract: 3,
+  equip: 4,
+  equipDetail: 5,
+  changeDetail: 5,
+  relocationDetail: 5,
+  m4Notice: null, // 번호 없는 안내 화면
+  result: 6,
+});
+
+function newNum() {
+  return { value: '', unknown: false };
+}
+
+function initialState() {
+  return {
+    step: 'start',
+    errors: [],
+    workType: undefined,
+    industry: { choice: undefined, name: '' }, // choice: listed | not_listed | unknown
+    contract: newNum(),
+    equip: {
+      selected: { melt: false, chem: false, dry: false, gas: false, vent: false },
+      none: false,
+      unknown: false,
+      details: {
+        melt: { capacity: newNum() },
+        chem: { meets: undefined, excluded: undefined },
+        dry: { fuel: newNum(), power: newNum(), purpose: undefined },
+        gas: { quantity: newNum(), fixed: undefined },
+        vent: { category: undefined, airVolume: newNum() },
+      },
+    },
+    m2: { gross: newNum(), excluded: newNum() },
+    m3: { relocated: newNum() },
+    chg: {
+      include: { melt: undefined, chem: undefined, dry: undefined, gas: undefined, vent: undefined },
+      details: {
+        melt: { existing: undefined, heat: undefined },
+        chem: { existing: undefined, production: undefined, managed: undefined },
+        dry: { existing: undefined, heat: undefined, target: undefined, newPurpose: undefined },
+        gas: { existing: undefined, pipe: undefined },
+        vent: { existing: undefined, change: undefined },
+      },
+    },
+  };
+}
+
+function equipMode(state) {
+  const e = state.equip;
+  if (e.none) return 'NONE';
+  if (e.unknown) return 'UNKNOWN';
+  if (EQUIP_IDS.some((id) => e.selected[id])) return 'SELECT';
+  return undefined;
+}
+
+/** 작업 형태별 단계 목록(선언형 조회). 법적 조건식 없음. */
+function stepsFor(state) {
+  const w = UI_WORK[state.workType];
+  if (w === WORK.NEW || w === WORK.FULL_RELOCATION) {
+    const s = ['workType', 'industry', 'contract', 'equip'];
+    if (equipMode(state) === 'SELECT') s.push('equipDetail');
+    s.push('result');
+    return s;
+  }
+  if (w === WORK.MODIFICATION) return ['workType', 'industry', 'contract', 'equip', 'changeDetail', 'result'];
+  if (w === WORK.PARTIAL_RELOCATION) return ['workType', 'industry', 'contract', 'relocationDetail', 'm4Notice', 'result'];
+  return ['workType'];
+}
+
+// ---- 값 파싱: 형식 검증만(숫자/유한/음수 아님). 법적 임계값 비교 없음 -----------------
+/** @returns {{kind:'omitted'|'unanswered'|'ok'|'negative'|'invalid', value?:number}} */
+function parseNum(f) {
+  if (f.unknown) return { kind: 'omitted' };
+  const raw = String(f.value == null ? '' : f.value).replace(/,/g, '').trim();
+  if (raw === '') return { kind: 'unanswered' };
+  if (/^\d+(\.\d+)?$/.test(raw)) return { kind: 'ok', value: Number(raw) };
+  if (/^-\s*\d/.test(raw)) return { kind: 'negative' };
+  return { kind: 'invalid' };
+}
+
+const triToBool = (t) => (t === 'yes' ? true : t === 'no' ? false : undefined); // unknown/미응답 → 키 생략
+
+function numOrUndef(f) {
+  const p = parseNum(f);
+  return p.kind === 'ok' ? p.value : undefined; // 빈 값/모름 → 키 생략, 사용자가 입력한 0은 0 보존
+}
+
+/** undefined 값과 빈 객체를 재귀적으로 제거. 빈 객체를 엔진에 보내지 않는다(equipment:{} 함정 방지). */
+function prune(o) {
+  if (Array.isArray(o) || o === null || typeof o !== 'object') return o;
+  const out = {};
+  for (const k of Object.keys(o)) {
+    const v = prune(o[k]);
+    if (v === undefined) continue;
+    if (v !== null && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length === 0) continue;
+    out[k] = v;
+  }
+  return out;
+}
+
+function dryVal(v) {
+  // UI 토큰 → Engine 값. 모름/미응답은 undefined(키 생략). 'other'는 D-B에 따라 OTHER_NOT_IN_ARTICLE3.
+  return Object.prototype.hasOwnProperty.call(UI_DRY, v) ? UI_DRY[v] : undefined;
+}
+function ventVal(v) {
+  return Object.prototype.hasOwnProperty.call(UI_VENT, v) ? UI_VENT[v] : undefined;
+}
+
+function installationEquipment(state) {
+  const mode = equipMode(state);
+  if (mode === 'NONE') return { none: true }; // 명시적으로 "해당 설비 없음"을 고른 경우에만
+  if (mode !== 'SELECT') return undefined; // 미응답/모름 → equipment 키 생략(→ UNKNOWN)
+  const d = state.equip.details;
+  const out = {};
+  if (state.equip.selected.melt) out.meltingFurnace = { present: true, capacityTon: numOrUndef(d.melt.capacity) };
+  if (state.equip.selected.chem) {
+    out.chemicalEquipment = {
+      present: true,
+      meetsHazardousSubstanceThreshold: triToBool(d.chem.meets),
+      excludedByDecree43_2: triToBool(d.chem.excluded),
+    };
+  }
+  if (state.equip.selected.dry) {
+    out.dryingEquipment = {
+      present: true,
+      fuelConsumptionKgPerHour: numOrUndef(d.dry.fuel),
+      ratedPowerKw: numOrUndef(d.dry.power),
+      purpose: dryVal(d.dry.purpose),
+    };
+  }
+  if (state.equip.selected.gas) {
+    out.gasWeldingAssembly = { present: true, flammableGasQuantityKg: numOrUndef(d.gas.quantity), isFixed: triToBool(d.gas.fixed) };
+  }
+  if (state.equip.selected.vent) {
+    out.ventilation = { present: true, substanceCategory: ventVal(d.vent.category), exhaustAirVolumeM3PerMin: numOrUndef(d.vent.airVolume) };
+  }
+  return out;
+}
+
+/** D-A: 증설 STEP 4 — "포함 안 됨"은 변경 조건 false, "모름"은 키 생략, "포함됨"은 세부 질문 답. */
+function changeEquipment(state) {
+  const inc = state.chg.include;
+  const d = state.chg.details;
+  const out = {};
+  const NO = false;
+  if (inc.melt === 'no') out.meltingFurnace = { heatSourceTypeChanged: NO };
+  else if (inc.melt === 'yes') out.meltingFurnace = { existingTarget: triToBool(d.melt.existing), heatSourceTypeChanged: triToBool(d.melt.heat) };
+
+  if (inc.chem === 'no') {
+    out.chemicalEquipment = { productionOrMaterialChangeReplacement: NO, managedSubstanceEquipmentChangeCausingVelocityDecreaseOrAirflowIncrease: NO };
+  } else if (inc.chem === 'yes') {
+    out.chemicalEquipment = {
+      existingTarget: triToBool(d.chem.existing),
+      productionOrMaterialChangeReplacement: triToBool(d.chem.production),
+      managedSubstanceEquipmentChangeCausingVelocityDecreaseOrAirflowIncrease: triToBool(d.chem.managed),
+    };
+  }
+
+  if (inc.dry === 'no') out.dryingEquipment = { heatSourceTypeChanged: NO, dryingTargetChanged: NO };
+  else if (inc.dry === 'yes') {
+    out.dryingEquipment = {
+      existingTarget: triToBool(d.dry.existing),
+      heatSourceTypeChanged: triToBool(d.dry.heat),
+      dryingTargetChanged: triToBool(d.dry.target),
+      newPurpose: d.dry.target === 'yes' ? dryVal(d.dry.newPurpose) : undefined,
+    };
+  }
+
+  if (inc.gas === 'no') out.gasWeldingAssembly = { mainPipeStructureChanged: NO };
+  else if (inc.gas === 'yes') out.gasWeldingAssembly = { existingTarget: triToBool(d.gas.existing), mainPipeStructureChanged: triToBool(d.gas.pipe) };
+
+  if (inc.vent === 'no') out.ventilation = { equipmentChangeCausingVelocityDecreaseOrAirflowIncrease: NO };
+  else if (inc.vent === 'yes') {
+    out.ventilation = { existingTarget: triToBool(d.vent.existing), equipmentChangeCausingVelocityDecreaseOrAirflowIncrease: triToBool(d.vent.change) };
+  }
+  return out;
+}
+
+/**
+ * 순수 매핑: UI 상태 → Engine 입력. 판정·검증 없음.
+ * - 모름/미응답/빈 값 → 키 생략. 명시적 0은 0. 빈 객체 금지(prune).
+ * - 현재 작업 형태에서 쓰이지 않는 입력(이설의 설비 입력 등)은 상태에 남아 있어도 보내지 않는다.
+ */
+function buildEngineInput(state) {
+  const w = UI_WORK[state.workType];
+  const input = { workType: w };
+  const ind = state.industry;
+  input.businessType = { withinListedIndustries: ind.choice === 'listed' ? true : ind.choice === 'not_listed' ? false : undefined };
+  input.contractCapacityKw = numOrUndef(state.contract);
+  if (w === WORK.NEW || w === WORK.FULL_RELOCATION) {
+    input.equipment = installationEquipment(state);
+  } else if (w === WORK.MODIFICATION) {
+    input.module2 = {
+      grossRatedCapacityIncreaseKw: numOrUndef(state.m2.gross),
+      sameManufacturerSameModelExcludedKw: numOrUndef(state.m2.excluded),
+    };
+    input.equipmentChange = changeEquipment(state);
+  } else if (w === WORK.PARTIAL_RELOCATION) {
+    input.module3 = { relocatedRatedCapacityKw: numOrUndef(state.m3.relocated) };
+  }
+  return prune(input);
+}
+
+// ---- 필수 질문 검증(D-F): 선택 없이 "다음" 불가, 숫자는 형식·음수만 차단 ---------------
+const MSG = Object.freeze({
+  select: '선택해 주세요.',
+  number: '숫자로 입력해 주세요.',
+  negative: '음수는 입력할 수 없습니다. 0 이상의 숫자로 입력해 주세요.',
+  numberOrUnknown: '숫자를 입력하거나 "아직 확인 못 함"을 선택해 주세요.',
+});
+
+function checkNum(errs, id, f) {
+  const p = parseNum(f);
+  if (p.kind === 'unanswered') errs.push({ id, message: MSG.numberOrUnknown });
+  else if (p.kind === 'invalid') errs.push({ id, message: MSG.number });
+  else if (p.kind === 'negative') errs.push({ id, message: MSG.negative });
+}
+function checkTri(errs, id, v) {
+  if (v === undefined) errs.push({ id, message: MSG.select });
+}
+
+/** @returns {{id:string,message:string}[]} 비어 있으면 진행 가능. 법적 임계값 비교 없음. */
+function validateStep(state, step) {
+  const errs = [];
+  if (step === 'workType') {
+    if (!state.workType) errs.push({ id: 'g-workType', message: MSG.select });
+  } else if (step === 'industry') {
+    const i = state.industry;
+    if (!i.choice) errs.push({ id: 'g-industry', message: MSG.select });
+    else if (i.choice === 'listed' && !i.name) errs.push({ id: 'f-industry-name', message: MSG.select });
+  } else if (step === 'contract') {
+    checkNum(errs, 'f-contract', state.contract);
+  } else if (step === 'equip') {
+    if (state.workType === 'modify') {
+      for (const id of EQUIP_IDS) checkTri(errs, 'g-include-' + id, state.chg.include[id]);
+    } else if (!equipMode(state)) {
+      errs.push({ id: 'g-equip', message: MSG.select });
+    }
+  } else if (step === 'equipDetail') {
+    const s = state.equip.selected;
+    const d = state.equip.details;
+    if (s.melt) checkNum(errs, 'f-melt-capacity', d.melt.capacity);
+    if (s.chem) {
+      checkTri(errs, 'g-chem-meets', d.chem.meets);
+      checkTri(errs, 'g-chem-excluded', d.chem.excluded);
+    }
+    if (s.dry) {
+      checkNum(errs, 'f-dry-fuel', d.dry.fuel);
+      checkNum(errs, 'f-dry-power', d.dry.power);
+      checkTri(errs, 'g-dry-purpose', d.dry.purpose);
+    }
+    if (s.gas) {
+      checkNum(errs, 'f-gas-quantity', d.gas.quantity);
+      checkTri(errs, 'g-gas-fixed', d.gas.fixed);
+    }
+    if (s.vent) {
+      checkTri(errs, 'g-vent-category', d.vent.category);
+      checkNum(errs, 'f-vent-airVolume', d.vent.airVolume);
+    }
+  } else if (step === 'changeDetail') {
+    checkNum(errs, 'f-m2-gross', state.m2.gross);
+    checkNum(errs, 'f-m2-excluded', state.m2.excluded);
+    const inc = state.chg.include;
+    const d = state.chg.details;
+    if (inc.melt === 'yes') {
+      checkTri(errs, 'g-melt-existing', d.melt.existing);
+      checkTri(errs, 'g-melt-heat', d.melt.heat);
+    }
+    if (inc.chem === 'yes') {
+      checkTri(errs, 'g-chem-existing', d.chem.existing);
+      checkTri(errs, 'g-chem-production', d.chem.production);
+      checkTri(errs, 'g-chem-managed', d.chem.managed);
+    }
+    if (inc.dry === 'yes') {
+      checkTri(errs, 'g-dry-existing', d.dry.existing);
+      checkTri(errs, 'g-dry-heat', d.dry.heat);
+      checkTri(errs, 'g-dry-target', d.dry.target);
+      if (d.dry.target === 'yes') checkTri(errs, 'g-dry-newPurpose', d.dry.newPurpose);
+    }
+    if (inc.gas === 'yes') {
+      checkTri(errs, 'g-gas-existing', d.gas.existing);
+      checkTri(errs, 'g-gas-pipe', d.gas.pipe);
+    }
+    if (inc.vent === 'yes') {
+      checkTri(errs, 'g-vent-existing', d.vent.existing);
+      checkTri(errs, 'g-vent-change', d.vent.change);
+    }
+  } else if (step === 'relocationDetail') {
+    checkNum(errs, 'f-m3-relocated', state.m3.relocated);
+  }
+  return errs;
+}
+
+/** 확인 필요 항목의 "입력 수정" 이동 대상 단계 — 정적 매핑(판정 아님). */
+function stepForTarget(state, target) {
+  const steps = stepsFor(state);
+  const pick = (...c) => c.find((s) => steps.includes(s));
+  if (target === 'business') return 'industry';
+  if (target === 'increase') return pick('changeDetail');
+  if (target === 'relocation') return pick('relocationDetail');
+  if (target === 'equipment') return pick('equipDetail', 'equip');
+  return steps[0];
+}
+
+module.exports = {
+  WORK,
+  DRYING,
+  VENT,
+  UI_WORK,
+  UI_DRY,
+  UI_VENT,
+  EQUIP_IDS,
+  ENGINE_KEY,
+  STEP_NUMBER,
+  MSG,
+  initialState,
+  equipMode,
+  stepsFor,
+  parseNum,
+  prune,
+  buildEngineInput,
+  validateStep,
+  stepForTarget,
+};
+
+},
+'./ui-copy.js': function (module, exports, require) {
+/**
+ * ui-copy.js — 화면 문구. UI-DESIGN.md §12의 문구를 그대로 쓴다.
+ * §12에 정의되지 않았지만 화면 구성상 꼭 필요한 문구는 "[추가]"로 표시했다(구현 후 검토 요청 대상).
+ * 임계값 숫자를 문구에 쓰지 않는다. 법적 안내를 새로 만들지 않는다.
+ */
+'use strict';
+
+const UNKNOWN_LABEL = '아직 확인 못 함';
+
+const COPY = Object.freeze({
+  // §12-1
+  appTitle: '유해·위험방지계획서 제출 대상 확인',
+  intro: '몇 가지 질문에 답하면 제출 대상 여부를 확인해 드립니다. 답을 모르는 항목은 "아직 확인 못 함"을 고르시면 됩니다.',
+  scope: '이 도구는 제조업 등 사업장만 다루며 건설공사 규모기준은 다루지 않습니다.',
+  start: '시작하기',
+  unknown: UNKNOWN_LABEL,
+
+  // §12-2
+  workTypeQ: '이번 작업은 어떤 형태인가요?',
+  workTypeOptions: Object.freeze([
+    { value: 'new', label: '신설' },
+    { value: 'full', label: '전체 이전' },
+    { value: 'partial', label: '일부 설비 이전(이설)' },
+    { value: 'modify', label: '증설·교체·개조(주요 구조부분 변경)' },
+  ]),
+
+  // §12-3
+  industryQ: '사업장의 업종이 대상 업종 13개 중 하나인가요?',
+  industryListed: '업종 목록에서 선택', // §12의 "(업종 목록에서 선택)" 안내 표기를 선택지 라벨로 옮김
+  industryPlaceholder: '업종을 선택해 주세요', // [추가]
+  industryNotListed: '13개 목록에 없음',
+  contractQ: '사업장의 전기 계약용량은 얼마인가요?',
+
+  // §12-4
+  equipInstallQ: '이번에 설치하거나 이전하는 설비 중 해당하는 것을 모두 선택해 주세요.',
+  equipNone: '해당 설비 없음',
+  equipChangeQ: '이번 작업에 아래 설비가 포함되나요?',
+  includeOptions: Object.freeze([
+    { value: 'yes', label: '포함됨' },
+    { value: 'no', label: '포함 안 됨' },
+    { value: 'unknown', label: UNKNOWN_LABEL },
+  ]),
+  equipNames: Object.freeze({
+    melt: '용해로',
+    chem: '화학설비',
+    dry: '건조설비',
+    gas: '가스집합용접장치',
+    vent: '유해물질 밀폐·환기·배기설비',
+  }),
+  yesNo: Object.freeze([
+    { value: 'yes', label: '예' },
+    { value: 'no', label: '아니오' },
+    { value: 'unknown', label: UNKNOWN_LABEL },
+  ]),
+  meltCapacityQ: '용해로 용량은 얼마인가요?',
+  chemMeetsQ: '취급하는 위험물질이 안전보건규칙 별표9의 기준량 이상인가요?',
+  chemExcludedQ: '시행령 제43조제2항에서 정한 설비에 해당해 화학설비 대상에서 제외되나요?',
+  dryPurposeQ: '건조설비를 어떤 목적으로 사용하나요?',
+  dryPurposeOptions: Object.freeze([
+    { value: 'organic', label: '유기화합물 건조' },
+    { value: 'coating', label: '도료·피막제 도포 후 표면건조(인화성 증기 발생)' },
+    { value: 'dust', label: '가연성 분말·분진이 발생하는 건조' },
+    { value: 'other', label: '위 세 가지에 해당하지 않음' },
+    { value: 'unknown', label: UNKNOWN_LABEL },
+  ]),
+  m2GrossQ: '이번 작업으로 늘어나는 전기정격용량의 합은 얼마인가요?',
+  m2ExcludedQ: '동일 제조사·동일 모델로 교체하는 설비의 정격용량(있다면):',
+  m3Q: '옮기는 설비의 전기정격용량 합은 얼마인가요?',
+  heatQ: '이번 작업으로 용해로의 열원 종류가 바뀌나요?',
+  numberFormatError: '숫자로 입력해 주세요.',
+
+  // §12-5 (이설 M4 안내 — 승인된 고정 문구, 그대로)
+  m4NoticeTitle: '대상설비 5종 확인 안내', // [추가] 안내 화면 제목
+  m4NoticeLines: Object.freeze([
+    '일부 설비 이전(이설) 시 대상설비 5종의 적용 기준이 아직 확정되지 않았습니다.',
+    "따라서 이 항목은 '대상 아님'으로 처리하지 않고 '확인 필요'로 남깁니다. 이 항목이 확인되지 않아 전체 판단이 완전하지 않습니다.",
+    '이설에 해당하는 경우 관련 기준을 별도로 확인해 주세요.',
+  ]),
+
+  // §12-6
+  confirmTitle: '확인이 필요한 항목',
+  editInput: '입력 수정',
+  restart: '처음부터 다시',
+
+  // ---- [추가] §12에 없는 화면 구성 문구 ----------------------------------------------
+  prev: '이전', // [추가]
+  next: '다음', // [추가]
+  showResult: '결과 보기', // [추가]
+  stepLabel: (n) => 'STEP ' + n + ' / 6', // [추가]
+  errorSummary: '입력을 확인해 주세요.', // [추가]
+  targetBasisTitle: '대상 판단 근거', // REPORT-DESIGN §5-B 명칭
+  detailTitle: '상세 판정', // REPORT-DESIGN §5-C 명칭
+  basisToggle: '근거 보기', // REPORT-DESIGN §5-C
+  createdAt: '결과 생성 시각', // [추가]
+  unitKw: 'kW',
+  unitTon: '톤',
+  unitKgH: 'kg/시간',
+  unitKg: 'kg',
+  unitM3: '㎥/분',
+
+  // [추가] 설비별 세부 질문(§12에는 예시 일부만 있음) — 설비 필드 의미를 그대로 옮긴 최소 문구
+  existingQ: (name) => name + '은(는) 이번 작업 전에 이미 대상설비에 해당했나요?',
+  chemProductionQ: '생산량 증가 또는 원료·제품 변경을 위해 화학설비를 교체·변경·추가하나요?',
+  chemManagedQ: '관리대상 유해물질 취급 설비를 변경해 제어풍속이 낮아지거나 배기량이 늘어나나요?',
+  dryHeatQ: '이번 작업으로 건조설비의 열원 종류가 바뀌나요?',
+  dryTargetQ: '이번 작업으로 건조 대상물이 바뀌나요?',
+  dryNewPurposeQ: '바뀐 건조 대상물의 건조 목적은 무엇인가요?',
+  gasPipeQ: '이번 작업으로 가스집합용접장치의 주관 구조가 변경되나요?',
+  ventChangeQ: '이번 작업으로 제어풍속이 낮아지거나 배기량이 늘어나나요?',
+  dryFuelQ: '건조설비의 연료 사용량은 시간당 얼마인가요?',
+  dryPowerQ: '건조설비의 정격소비전력은 얼마인가요?',
+  gasQuantityQ: '가스집합용접장치의 가연성가스 저장·취급 수량은 얼마인가요?',
+  gasFixedQ: '고정 설치되는 장치인가요?',
+  ventCategoryQ: '해당 설비가 다루는 물질 구분은 무엇인가요?',
+  ventCategoryOptions: Object.freeze([
+    { value: 'cat1', label: '안전검사 절차에 관한 고시 별표1 제7호 유해물질' },
+    { value: 'cat2', label: '허가대상·관리대상 유해물질 또는 별표16 분진작업' },
+    { value: 'unknown', label: UNKNOWN_LABEL },
+  ]),
+  ventAirVolumeQ: '배풍량(배기풍량)은 얼마인가요?',
+  equipDetailTitle: '선택한 설비의 세부 조건', // [추가]
+  changeDetailTitle: '정격용량과 변경 조건', // [추가]
+  relocationDetailTitle: '이설 설비의 정격용량', // [추가]
+});
+
+module.exports = { COPY };
+
+},
+'./ui-render.js': function (module, exports, require) {
+/**
+ * ui-render.js — 화면 렌더러 (순수 함수: 상태/UserView → HTML 문자열)
+ *
+ *  - 결과 화면은 UserView(허용 목록 투영)만 받는다. ReportModel/Snapshot에는 접근하지 않는다.
+ *  - 법적 판정·임계값 비교 없음. engine.js / data.js를 import하지 않는다.
+ *  - DOM(속성 포함)에 Engine 열거값·내부 필드명·내부 ID·개발 문서명이 들어가지 않는다.
+ *  - 모든 동적 문자열은 esc()로 이스케이프한다.
+ */
+'use strict';
+
+const { COPY } = require('./ui-copy.js');
+const { EQUIP_IDS, STEP_NUMBER, stepsFor } = require('./ui-model.js');
+
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function errMsg(errors, id) {
+  const e = (errors || []).find((x) => x.id === id);
+  return e ? e.message : null;
+}
+
+function getPath(obj, path) {
+  return path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj);
+}
+
+// ---- 입력 컨트롤 ----------------------------------------------------------------------
+function radioGroup(state, errors, { id, path, legend, options }) {
+  const cur = getPath(state, path);
+  const m = errMsg(errors, id);
+  const items = options
+    .map((o, i) => {
+      const iid = id + '-' + i;
+      return (
+        '<label class="opt" for="' + iid + '"><input type="radio" id="' + iid + '" name="' + esc(id) + '" data-path="' + esc(path) +
+        '" value="' + esc(o.value) + '"' + (cur === o.value ? ' checked' : '') + '><span>' + esc(o.label) + '</span></label>'
+      );
+    })
+    .join('');
+  return (
+    '<fieldset class="group' + (m ? ' has-error' : '') + '" id="' + esc(id) + '"' + (m ? ' aria-describedby="err-' + esc(id) + '"' : '') +
+    '><legend>' + esc(legend) + '</legend>' + items +
+    (m ? '<p class="err" id="err-' + esc(id) + '">' + esc(m) + '</p>' : '') + '</fieldset>'
+  );
+}
+
+function numField(state, errors, { id, path, label, unit }) {
+  const f = getPath(state, path);
+  const m = errMsg(errors, id);
+  return (
+    '<div class="field' + (m ? ' has-error' : '') + '" id="' + esc(id) + '">' +
+    '<label class="q" for="' + esc(id) + '-input">' + esc(label) + '</label>' +
+    '<div class="row"><input id="' + esc(id) + '-input" type="text" inputmode="decimal" autocomplete="off" data-path="' + esc(path) +
+    '.value" value="' + esc(f.value) + '"' + (f.unknown ? ' disabled' : '') + (m ? ' aria-invalid="true" aria-describedby="err-' + esc(id) + '"' : '') +
+    '><span class="unit">' + esc(unit) + '</span></div>' +
+    '<label class="opt" for="' + esc(id) + '-unknown"><input type="checkbox" id="' + esc(id) + '-unknown" data-path="' + esc(path) +
+    '.unknown"' + (f.unknown ? ' checked' : '') + '><span>' + esc(COPY.unknown) + '</span></label>' +
+    (m ? '<p class="err" id="err-' + esc(id) + '">' + esc(m) + '</p>' : '') + '</div>'
+  );
+}
+
+// ---- 단계별 본문 -----------------------------------------------------------------------
+function bodyWorkType(state, errors) {
+  return radioGroup(state, errors, { id: 'g-workType', path: 'workType', legend: COPY.workTypeQ, options: COPY.workTypeOptions });
+}
+
+function bodyIndustry(state, errors, ctx) {
+  const m = errMsg(errors, 'g-industry');
+  const mName = errMsg(errors, 'f-industry-name');
+  const ch = state.industry.choice;
+  const opts = (ctx.industryList || [])
+    .map((n) => '<option value="' + esc(n) + '"' + (state.industry.name === n ? ' selected' : '') + '>' + esc(n) + '</option>')
+    .join('');
+  const radio = (i, value, label) =>
+    '<label class="opt" for="g-industry-' + i + '"><input type="radio" id="g-industry-' + i + '" name="g-industry" data-path="industry.choice" value="' +
+    value + '"' + (ch === value ? ' checked' : '') + '><span>' + esc(label) + '</span></label>';
+  return (
+    '<fieldset class="group' + (m ? ' has-error' : '') + '" id="g-industry"><legend>' + esc(COPY.industryQ) + '</legend>' +
+    radio(0, 'listed', COPY.industryListed) +
+    '<div class="sub' + (mName ? ' has-error' : '') + '" id="f-industry-name"><label class="vh" for="f-industry-name-input">' + esc(COPY.industryPlaceholder) + '</label>' +
+    '<select id="f-industry-name-input" data-path="industry.name"' + (ch === 'listed' ? '' : ' disabled') + (mName ? ' aria-invalid="true"' : '') + '>' +
+    '<option value="">' + esc(COPY.industryPlaceholder) + '</option>' + opts + '</select>' +
+    (mName ? '<p class="err" id="err-f-industry-name">' + esc(mName) + '</p>' : '') + '</div>' +
+    radio(1, 'not_listed', COPY.industryNotListed) +
+    radio(2, 'unknown', COPY.unknown) +
+    (m ? '<p class="err" id="err-g-industry">' + esc(m) + '</p>' : '') + '</fieldset>'
+  );
+}
+
+function bodyContract(state, errors) {
+  return numField(state, errors, { id: 'f-contract', path: 'contract', label: COPY.contractQ, unit: COPY.unitKw });
+}
+
+function bodyEquip(state, errors) {
+  if (state.workType === 'modify') {
+    return (
+      '<p class="lead">' + esc(COPY.equipChangeQ) + '</p>' +
+      EQUIP_IDS.map((id) =>
+        radioGroup(state, errors, { id: 'g-include-' + id, path: 'chg.include.' + id, legend: COPY.equipNames[id], options: COPY.includeOptions })
+      ).join('')
+    );
+  }
+  const m = errMsg(errors, 'g-equip');
+  const e = state.equip;
+  const cb = (key, label, checked) =>
+    '<label class="opt" for="eq-' + key + '"><input type="checkbox" id="eq-' + key + '" data-action="equip-toggle" data-key="' + key + '"' +
+    (checked ? ' checked' : '') + '><span>' + esc(label) + '</span></label>';
+  return (
+    '<fieldset class="group' + (m ? ' has-error' : '') + '" id="g-equip"><legend>' + esc(COPY.equipInstallQ) + '</legend>' +
+    EQUIP_IDS.map((id) => cb(id, COPY.equipNames[id], e.selected[id])).join('') +
+    '<hr class="sep">' + cb('none', COPY.equipNone, e.none) + cb('unknown', COPY.unknown, e.unknown) +
+    (m ? '<p class="err" id="err-g-equip">' + esc(m) + '</p>' : '') + '</fieldset>'
+  );
+}
+
+function section(title, inner) {
+  return '<section class="subsec"><h3>' + esc(title) + '</h3>' + inner + '</section>';
+}
+
+function bodyEquipDetail(state, errors) {
+  const s = state.equip.selected;
+  const rg = (id, path, legend, options) => radioGroup(state, errors, { id, path, legend, options });
+  const nf = (id, path, label, unit) => numField(state, errors, { id, path, label, unit });
+  let out = '';
+  if (s.melt) out += section(COPY.equipNames.melt, nf('f-melt-capacity', 'equip.details.melt.capacity', COPY.meltCapacityQ, COPY.unitTon));
+  if (s.chem) {
+    out += section(
+      COPY.equipNames.chem,
+      rg('g-chem-meets', 'equip.details.chem.meets', COPY.chemMeetsQ, COPY.yesNo) +
+        rg('g-chem-excluded', 'equip.details.chem.excluded', COPY.chemExcludedQ, COPY.yesNo)
+    );
+  }
+  if (s.dry) {
+    out += section(
+      COPY.equipNames.dry,
+      nf('f-dry-fuel', 'equip.details.dry.fuel', COPY.dryFuelQ, COPY.unitKgH) +
+        nf('f-dry-power', 'equip.details.dry.power', COPY.dryPowerQ, COPY.unitKw) +
+        rg('g-dry-purpose', 'equip.details.dry.purpose', COPY.dryPurposeQ, COPY.dryPurposeOptions)
+    );
+  }
+  if (s.gas) {
+    out += section(
+      COPY.equipNames.gas,
+      nf('f-gas-quantity', 'equip.details.gas.quantity', COPY.gasQuantityQ, COPY.unitKg) +
+        rg('g-gas-fixed', 'equip.details.gas.fixed', COPY.gasFixedQ, COPY.yesNo)
+    );
+  }
+  if (s.vent) {
+    out += section(
+      COPY.equipNames.vent,
+      rg('g-vent-category', 'equip.details.vent.category', COPY.ventCategoryQ, COPY.ventCategoryOptions) +
+        nf('f-vent-airVolume', 'equip.details.vent.airVolume', COPY.ventAirVolumeQ, COPY.unitM3)
+    );
+  }
+  return out;
+}
+
+function bodyChangeDetail(state, errors) {
+  const inc = state.chg.include;
+  const rg = (id, path, legend, options) => radioGroup(state, errors, { id, path, legend, options });
+  const nf = (id, path, label, unit) => numField(state, errors, { id, path, label, unit });
+  const yn = COPY.yesNo;
+  let out = section(
+    COPY.changeDetailTitle,
+    nf('f-m2-gross', 'm2.gross', COPY.m2GrossQ, COPY.unitKw) + nf('f-m2-excluded', 'm2.excluded', COPY.m2ExcludedQ, COPY.unitKw)
+  );
+  const ex = (id) => rg('g-' + id + '-existing', 'chg.details.' + id + '.existing', COPY.existingQ(COPY.equipNames[id]), yn);
+  if (inc.melt === 'yes') out += section(COPY.equipNames.melt, ex('melt') + rg('g-melt-heat', 'chg.details.melt.heat', COPY.heatQ, yn));
+  if (inc.chem === 'yes') {
+    out += section(
+      COPY.equipNames.chem,
+      ex('chem') + rg('g-chem-production', 'chg.details.chem.production', COPY.chemProductionQ, yn) + rg('g-chem-managed', 'chg.details.chem.managed', COPY.chemManagedQ, yn)
+    );
+  }
+  if (inc.dry === 'yes') {
+    out += section(
+      COPY.equipNames.dry,
+      ex('dry') +
+        rg('g-dry-heat', 'chg.details.dry.heat', COPY.dryHeatQ, yn) +
+        rg('g-dry-target', 'chg.details.dry.target', COPY.dryTargetQ, yn) +
+        (state.chg.details.dry.target === 'yes' ? rg('g-dry-newPurpose', 'chg.details.dry.newPurpose', COPY.dryNewPurposeQ, COPY.dryPurposeOptions) : '')
+    );
+  }
+  if (inc.gas === 'yes') out += section(COPY.equipNames.gas, ex('gas') + rg('g-gas-pipe', 'chg.details.gas.pipe', COPY.gasPipeQ, yn));
+  if (inc.vent === 'yes') out += section(COPY.equipNames.vent, ex('vent') + rg('g-vent-change', 'chg.details.vent.change', COPY.ventChangeQ, yn));
+  return out;
+}
+
+function bodyRelocationDetail(state, errors) {
+  return numField(state, errors, { id: 'f-m3-relocated', path: 'm3.relocated', label: COPY.m3Q, unit: COPY.unitKw });
+}
+
+function bodyM4Notice() {
+  return '<div class="callout tone-unknown">' + COPY.m4NoticeLines.map((l) => '<p>' + esc(l) + '</p>').join('') + '</div>';
+}
+
+const TITLES = {
+  workType: () => COPY.workTypeQ,
+  industry: () => COPY.industryQ,
+  contract: () => COPY.contractQ,
+  equip: (s) => (s.workType === 'modify' ? COPY.equipChangeQ : COPY.equipInstallQ),
+  equipDetail: () => COPY.equipDetailTitle,
+  changeDetail: () => COPY.changeDetailTitle,
+  relocationDetail: () => COPY.relocationDetailTitle,
+  m4Notice: () => COPY.m4NoticeTitle,
+};
+
+// 질문 문구는 fieldset의 legend에 이미 있으므로, 제목은 화면 이름 역할만 한다.
+function stepHeading(state, step) {
+  if (step === 'workType' || step === 'industry' || step === 'contract' || step === 'equip') {
+    return { visible: false, text: TITLES[step](state) };
+  }
+  return { visible: true, text: TITLES[step](state) };
+}
+
+function renderErrorSummary(errors) {
+  if (!errors || !errors.length) return '';
+  return (
+    '<div class="errsum" id="errsum" role="alert" tabindex="-1"><p><strong>' + esc(COPY.errorSummary) + '</strong></p><ul>' +
+    errors.map((e) => '<li><a href="#' + esc(e.id) + '" data-action="focus-field" data-id="' + esc(e.id) + '">' + esc(e.message) + '</a></li>').join('') +
+    '</ul></div>'
+  );
+}
+
+/** 입력 단계 렌더링(시작 화면 포함). 결과 화면은 renderResult를 쓴다. */
+function renderWizard(state, ctx) {
+  const step = state.step;
+  if (step === 'start') {
+    return (
+      '<section class="screen"><h1 id="step-title" tabindex="-1">' + esc(COPY.appTitle) + '</h1><p class="lead">' + esc(COPY.intro) + '</p>' +
+      '<p class="scope">' + esc(COPY.scope) + '</p>' +
+      '<div class="nav"><button type="button" class="btn primary" data-action="start">' + esc(COPY.start) + '</button></div></section>'
+    );
+  }
+  const steps = stepsFor(state);
+  const idx = steps.indexOf(step);
+  const prevStep = idx > 0 ? steps[idx - 1] : null;
+  const nextStep = idx >= 0 ? steps[idx + 1] : null;
+  const errors = state.errors || [];
+  const bodies = {
+    workType: bodyWorkType,
+    industry: (s, e) => bodyIndustry(s, e, ctx),
+    contract: bodyContract,
+    equip: bodyEquip,
+    equipDetail: bodyEquipDetail,
+    changeDetail: bodyChangeDetail,
+    relocationDetail: bodyRelocationDetail,
+    m4Notice: bodyM4Notice,
+  };
+  const h = stepHeading(state, step);
+  const num = STEP_NUMBER[step];
+  return (
+    '<section class="screen" aria-labelledby="step-title">' +
+    (num ? '<p class="stepno">' + esc(COPY.stepLabel(num)) + '</p>' : '') +
+    '<h2 id="step-title" tabindex="-1"' + (h.visible ? '' : ' class="vh"') + '>' + esc(h.text) + '</h2>' +
+    renderErrorSummary(errors) +
+    bodies[step](state, errors) +
+    '<p class="scope">' + esc(COPY.scope) + '</p>' +
+    '<div class="nav">' +
+    (prevStep ? '<button type="button" class="btn" data-action="prev">' + esc(COPY.prev) + '</button>' : '<span></span>') +
+    '<button type="button" class="btn primary" data-action="next">' + esc(nextStep === 'result' ? COPY.showResult : COPY.next) + '</button>' +
+    '</div></section>'
+  );
+}
+
+// ---- 결과 화면 (UserView만 사용) -----------------------------------------------------------
+const ICON = { target: '●', unknown: '▲', neutral: '○', error: '■' };
+
+function badge(tone, text) {
+  return '<span class="badge tone-' + esc(tone) + '"><span aria-hidden="true">' + ICON[tone] + '</span> ' + esc(text) + '</span>';
+}
+
+function basisBlock(list) {
+  if (!list || !list.length) return '';
+  const items = list
+    .map((b) => {
+      if (b.missing) return '<li><p>' + esc(b.message) + '</p></li>';
+      const meta = [b.effectiveDate ? '시행일 ' + b.effectiveDate : '', b.noticeNo ? '고시 ' + b.noticeNo : '', b.reliabilityLabel || '']
+        .filter(Boolean)
+        .join(' · ');
+      return '<li><strong>' + esc(b.statute) + '</strong><p>' + esc(b.text) + '</p>' + (meta ? '<p class="muted">' + esc(meta) + '</p>' : '') + '</li>';
+    })
+    .join('');
+  return '<details class="basis"><summary>' + esc(COPY.basisToggle) + '</summary><ul>' + items + '</ul></details>';
+}
+
+function moduleCard(m) {
+  if (m.display === 'NOT_APPLICABLE') {
+    return '<article class="card tone-neutral"><h4>' + esc(m.label) + '</h4><p class="muted">' + esc(m.message) + '</p></article>';
+  }
+  return (
+    '<article class="card tone-' + esc(m.tone) + '"><h4>' + esc(m.label) + '</h4><p>' + badge(m.tone, m.resultLabel) + '</p>' +
+    (m.display === 'PRECONDITION' ? '<p class="muted">' + esc(m.message) + '</p>' : '') + basisBlock(m.basis) + '</article>'
+  );
+}
+
+function m4Card(m4) {
+  let inner = '<h4>' + esc(m4.label) + '</h4><p>' + badge(m4.tone, m4.resultLabel) + '</p>';
+  if (m4.unresolvedLines) {
+    inner += '<div class="callout tone-unknown">' + m4.unresolvedLines.map((l) => '<p>' + esc(l) + '</p>').join('') + '</div>';
+  }
+  for (const p of m4.paths) {
+    inner += '<div class="path"><h5>' + esc(p.label) + '</h5><p>' + badge(p.tone, p.resultLabel) + '</p>';
+    if (p.rows.length) {
+      inner += '<ul class="rows">' + p.rows.map((r) => '<li><span>' + esc(r.label) + '</span>' + badge(r.tone, r.stateLabel) + '</li>').join('') + '</ul>';
+    }
+    inner += '</div>';
+  }
+  if (m4.inactivePaths.length) inner += '<p class="muted">' + esc(m4.inactiveMessage) + ': ' + esc(m4.inactivePaths.join(', ')) + '</p>';
+  inner += basisBlock(m4.basis);
+  return '<article class="card tone-' + esc(m4.tone) + '">' + inner + '</article>';
+}
+
+function formatCreatedAt(iso) {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  const p = (n) => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
+
+function renderResult(view) {
+  const h = view.headline;
+  let out = '<section class="screen result" aria-labelledby="step-title"><p class="stepno">' + esc(COPY.stepLabel(6)) + '</p>';
+  out += '<div class="headline tone-' + esc(h.tone) + '" aria-live="polite"><span class="ico" aria-hidden="true">' + ICON[h.tone] + '</span><div>' +
+    '<h2 id="step-title" tabindex="-1">' + esc(h.text) + '</h2>' + (h.subtitle ? '<p class="sub">' + esc(h.subtitle) + '</p>' : '') + '</div></div>';
+  if (view.footer.versionBanner) out += '<p class="callout tone-unknown" role="status">' + esc(view.footer.versionBanner) + '</p>';
+  if (view.workTypeLabel) out += '<p class="muted">' + esc(view.workTypeLabel) + '</p>';
+
+  if (view.confirmItems.length) {
+    out += '<section class="block tone-unknown"><h3>' + esc(COPY.confirmTitle) + '</h3><ul class="confirm">' +
+      view.confirmItems
+        .map((i) =>
+          '<li><span>' + esc(i.text) + '</span>' +
+          (i.kind === 'INPUT' ? ' <button type="button" class="link" data-action="goto-target" data-target="' + esc(i.target) + '">' + esc(COPY.editInput) + '</button>' : '') + '</li>'
+        )
+        .join('') + '</ul></section>';
+  }
+  if (view.targetModules.length) {
+    out += '<section class="block"><h3>' + esc(COPY.targetBasisTitle) + '</h3><ul>' +
+      view.targetModules.map((t) => '<li>' + esc(t.label) + (t.equipment.length ? ' — ' + esc(t.equipment.join(', ')) : '') + '</li>').join('') + '</ul></section>';
+  }
+  out += '<section class="block"><h3>' + esc(COPY.detailTitle) + '</h3>' + view.modules.map(moduleCard).join('') + m4Card(view.m4) + '</section>';
+  if (view.footer.createdAt) out += '<p class="muted">' + esc(COPY.createdAt) + ': ' + esc(formatCreatedAt(view.footer.createdAt)) + '</p>';
+  out += '<p class="scope">' + esc(COPY.scope) + '</p>';
+  out += '<div class="nav"><button type="button" class="btn" data-action="edit">' + esc(COPY.editInput) + '</button>' +
+    '<button type="button" class="btn" data-action="restart">' + esc(COPY.restart) + '</button></div></section>';
+  return out;
+}
+
+module.exports = { esc, renderWizard, renderResult, formatCreatedAt };
+
+},
+'./app.js': function (module, exports, require) {
+/**
+ * app.js — 컨트롤러 (UI-DESIGN.md §1)
+ *
+ *   Wizard(상태) → buildEngineInput → [evaluate] → Snapshot → buildReportModel → toUserView → Renderer
+ *
+ * - `evaluate()`를 호출하는 곳은 이 파일(runEvaluation)뿐이다. Wizard·Renderer·Report는 호출하지 않는다.
+ * - 컨트롤러가 INDUSTRY_LIST·LAW_BASIS·현재 ruleVersion을 읽어 UI/Report에 인자로 전달한다.
+ * - 판정·임계값 비교·보정 로직을 두지 않는다(OPEN-ISSUE-ENGINE-M4-CHEM-EXCLUSION-UNKNOWN 보정 금지 포함).
+ * - 상태는 인메모리다(브라우저 저장소 미사용).
+ */
+'use strict';
+
+const engine = require('./engine.js');
+const { LAW_BASIS, INDUSTRY_LIST } = require('./law-basis.js');
+const { buildReportModel, toUserView } = require('./report.js');
+const model = require('./ui-model.js');
+const render = require('./ui-render.js');
+
+function createDeps(overrides) {
+  return Object.assign(
+    {
+      evaluate: engine.evaluate,
+      lawBasis: LAW_BASIS,
+      industryList: INDUSTRY_LIST,
+      currentRuleVersion: engine.RULE_VERSION,
+      now: () => new Date().toISOString(),
+    },
+    overrides || {}
+  );
+}
+
+/** 상태 → (Engine 입력, Snapshot, ReportModel, UserView). 판정은 Engine만 한다. */
+function runEvaluation(state, deps) {
+  const input = model.buildEngineInput(state);
+  const snapshot = deps.evaluate(input, { now: deps.now() });
+  const reportModel = buildReportModel(snapshot, deps.lawBasis, { currentRuleVersion: deps.currentRuleVersion });
+  const userView = toUserView(reportModel);
+  return { input, snapshot, reportModel, userView };
+}
+
+function setPath(obj, path, value) {
+  const keys = path.split('.');
+  let o = obj;
+  for (let i = 0; i < keys.length - 1; i++) o = o[keys[i]];
+  o[keys[keys.length - 1]] = value;
+}
+
+function mount(root, deps) {
+  const d = deps || createDeps();
+  let state = model.initialState();
+  let userView = null;
+
+  function draw(opts) {
+    const o = opts || {};
+    const active = typeof document !== 'undefined' ? document.activeElement : null;
+    const keepId = o.keepFocus && active && active.id ? active.id : null;
+    root.innerHTML = state.step === 'result' ? render.renderResult(userView) : render.renderWizard(state, { industryList: d.industryList });
+    let el = null;
+    if (o.focus === 'errsum') el = document.getElementById('errsum');
+    else if (o.focus === 'title') el = document.getElementById('step-title');
+    else if (keepId) el = document.getElementById(keepId);
+    if (el && el.focus) el.focus();
+  }
+
+  function goto(step, opts) {
+    state.step = step;
+    state.errors = [];
+    draw(opts || { focus: 'title' });
+    if (typeof window !== 'undefined' && window.scrollTo) window.scrollTo(0, 0);
+  }
+
+  function next() {
+    const step = state.step;
+    const errs = model.validateStep(state, step);
+    if (errs.length) {
+      state.errors = errs;
+      draw({ focus: 'errsum' });
+      return;
+    }
+    const steps = model.stepsFor(state);
+    const nextStep = steps[steps.indexOf(step) + 1];
+    if (!nextStep) return;
+    if (nextStep === 'result') userView = runEvaluation(state, d).userView;
+    goto(nextStep);
+  }
+
+  function prev() {
+    const steps = model.stepsFor(state);
+    const i = steps.indexOf(state.step);
+    if (i > 0) goto(steps[i - 1]);
+  }
+
+  function toggleEquip(key, checked) {
+    const e = state.equip;
+    if (key === 'none' || key === 'unknown') {
+      e[key] = checked;
+      if (checked) {
+        for (const id of model.EQUIP_IDS) e.selected[id] = false;
+        e[key === 'none' ? 'unknown' : 'none'] = false;
+      }
+    } else {
+      e.selected[key] = checked;
+      if (checked) {
+        e.none = false;
+        e.unknown = false;
+      }
+    }
+    state.errors = [];
+  }
+
+  root.addEventListener('click', (ev) => {
+    const t = ev.target.closest ? ev.target.closest('[data-action]') : null;
+    if (!t) return;
+    const a = t.getAttribute('data-action');
+    if (a === 'equip-toggle') return; // change 이벤트에서 처리
+    if (a === 'start') goto('workType');
+    else if (a === 'next') next();
+    else if (a === 'prev') prev();
+    else if (a === 'edit') goto('workType');
+    else if (a === 'restart') {
+      state = model.initialState();
+      userView = null;
+      goto('start');
+    } else if (a === 'goto-target') goto(model.stepForTarget(state, t.getAttribute('data-target')));
+    else if (a === 'focus-field') {
+      ev.preventDefault();
+      const c = document.getElementById(t.getAttribute('data-id'));
+      const f = c && (c.matches('input,select') ? c : c.querySelector('input:not([disabled]),select:not([disabled])'));
+      if (f) f.focus();
+    }
+  });
+
+  root.addEventListener('input', (ev) => {
+    const t = ev.target;
+    const p = t.getAttribute && t.getAttribute('data-path');
+    if (p && t.type === 'text') setPath(state, p, t.value); // 텍스트 입력은 재렌더 없이 상태만 갱신(포커스 유지)
+  });
+
+  root.addEventListener('change', (ev) => {
+    const t = ev.target;
+    if (t.getAttribute('data-action') === 'equip-toggle') {
+      toggleEquip(t.getAttribute('data-key'), t.checked);
+      draw({ keepFocus: true });
+      return;
+    }
+    const p = t.getAttribute('data-path');
+    if (!p || t.type === 'text') return;
+    if (t.type === 'checkbox') {
+      setPath(state, p, t.checked);
+      if (t.checked && /\.unknown$/.test(p)) setPath(state, p.replace(/\.unknown$/, '.value'), ''); // "모름"이면 입력값 비움
+    } else {
+      setPath(state, p, t.value);
+    }
+    if (p === 'workType') state.errors = [];
+    draw({ keepFocus: true });
+  });
+
+  root.addEventListener('keydown', (ev) => {
+    // 키보드 편의: 숫자 입력칸에서 Enter = 다음
+    if (ev.key === 'Enter' && ev.target.type === 'text' && state.step !== 'start' && state.step !== 'result') {
+      ev.preventDefault();
+      next();
+    }
+  });
+
+  draw({});
+  return { getState: () => state };
+}
+
+module.exports = { createDeps, runEvaluation, mount };
+
+if (typeof document !== 'undefined' && document.getElementById) {
+  const root = document.getElementById('app');
+  if (root) mount(root);
+}
+
+}
+};
+var cache = {};
+function req(name) {
+  var key = name.indexOf('./') === 0 ? name : './' + name;
+  if (!/\.js$/.test(key)) key += '.js';
+  if (cache[key]) return cache[key].exports;
+  if (!defs[key]) throw new Error('module not found: ' + name);
+  var m = { exports: {} };
+  cache[key] = m;
+  defs[key].call(m.exports, m, m.exports, req);
+  return m.exports;
+}
+req('./app.js');
+})();
+</script>
+</body>
+</html>
